@@ -1,4 +1,5 @@
 import React from 'react';
+import { animeList } from './data/data';
 import Header from './components/Header';
 import Main from './components/Main';
 import Footer from './components/Footer';
@@ -8,7 +9,7 @@ function App() {
   return (
     <>
       <Header />
-      <Main />
+      <Main data={animeList} />
       <Footer />
     </>
   );
