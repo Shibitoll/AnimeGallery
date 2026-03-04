@@ -4,6 +4,12 @@ html, body, #root {
   width: 100%;
 }
 
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 body {
   margin: 0;
   background-color: #f5f6f8;
@@ -69,6 +75,7 @@ a {
 /* MAIN CONTENT */
 .main-content {
   padding: 40px;
+  flex-grow: 1;
 }
 
 .welcome-section {
@@ -267,4 +274,17 @@ a {
 .favorite-btn:hover {
   transform: scale(1.15);
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Відступи для додаткових секцій (Улюблені, Переглянуті) на головній сторінці */
+.category-section {
+  margin-top: 50px;
+}
+
+/* Стиль для повідомлення, коли список порожній */
+.empty-message {
+  text-align: center;
+  color: #666;
+  margin-top: 40px;
+  font-size: 16px;
 }

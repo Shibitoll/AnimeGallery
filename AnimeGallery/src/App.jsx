@@ -7,6 +7,7 @@ import './styles/App.css';
 
 function App() {
   const [animeList, setAnimeList] = useState(initialAnimeList);
+  const [currentTab, setCurrentTab] = useState('home');
 
   // Функція для лайків
   const toggleFavorite = (id) => {
@@ -27,18 +28,21 @@ function App() {
   };
 
   return (
-    <>
+    <div className="app-wrapper">
       <Header 
         favoriteCount={animeList.filter(a => a.isFavorite).length} 
         watchedCount={animeList.filter(a => a.isWatched).length}
+        currentTab={currentTab} 
+        setCurrentTab={setCurrentTab} 
       />
       <Main 
         data={animeList} 
         toggleFavorite={toggleFavorite} 
         toggleWatched={toggleWatched}
+        currentTab={currentTab}
       />
       <Footer />
-    </>
+    </div>
   );
 }
 
