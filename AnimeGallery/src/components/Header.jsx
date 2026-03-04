@@ -37,6 +37,13 @@ const Header = ({ favoriteCount, watchedCount, currentTab, setCurrentTab }) => {
                        onClick={(e) => handleNavClick(e, 'watched')}>
                         Переглянуті {watchedCount > 0 && `(${watchedCount})`}
                     </a>
+
+                    <a href="#my-anime" 
+                        className={`nav-link ${currentTab === 'my-anime' ? 'active' : ''}`}
+                        onClick={(e) => handleNavClick(e, 'my-anime')}
+                    >
+                            + Мої аніме
+                    </a>
                 </nav>   
             </div>
         </header>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const AnimeCard = ({ id, title, poster, rating, description, year, episodes, studio, genres, isFavorite, isWatched, onToggleFavorite, onToggleWatched }) => {
+const AnimeCard = ({ id, title, poster, rating, description, year, episodes, studio, genres, isFavorite, isWatched, onToggleFavorite, onToggleWatched, isAddedByUser, onDeleteAnime }) => {
   return (
     <article className={`anime-card ${isWatched ? 'watched-card' : ''}`}>
       <div className="poster-wrapper">
@@ -11,6 +11,18 @@ const AnimeCard = ({ id, title, poster, rating, description, year, episodes, stu
         <button className="favorite-btn" onClick={() => onToggleFavorite(id)}>
           {isFavorite ? '❤️' : '♡'}
         </button>
+
+        {/* Кнопка видалення (з'являється тільки для доданих користувачем) */}
+        {isAddedByUser && (
+          <button 
+            className="delete-btn" 
+            onClick={() => onDeleteAnime(id)}
+            title="Видалити аніме"
+          >
+            🗑️
+          </button>
+        )}
+
       </div>
 
       <div className="card-content">

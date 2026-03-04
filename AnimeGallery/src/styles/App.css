@@ -235,12 +235,12 @@ a {
 
 /* Стан, коли аніме переглянуто */
 .watch-status-btn.is-watched {
-  background-color: #10b981; /* Зелений колір */
+  background-color: #10b981; 
   color: white;
 }
 
 .watch-status-btn.is-watched:hover {
-  background-color: #059669; /* Темніший зелений при наведенні */
+  background-color: #059669; 
 }
 
 /* Робимо картку трохи тьмянішою, якщо вона вже переглянута */
@@ -287,4 +287,29 @@ a {
   color: #666;
   margin-top: 40px;
   font-size: 16px;
+}
+
+/* Кнопка видалення власного аніме (поруч із сердечком) */
+.delete-btn {
+  position: absolute;
+  top: 10px;
+  left: 54px; 
+  background-color: #ffffff;
+  border: 1.5px solid #ef4444; 
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  z-index: 2;
+}
+
+.delete-btn:hover {
+  background-color: #fee2e2; 
+  transform: scale(1.15);
 }

@@ -1,0 +1,106 @@
+.my-anime-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.my-anime-header {
+  text-align: center;
+  margin-bottom: 40px;
+  background: linear-gradient(135deg, #111827 0%, #374151 100%);
+  color: white;
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.my-anime-header h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+.my-anime-header p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #e5e7eb;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.add-anime-form-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 50px;
+}
+
+.add-anime-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 12px 15px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  background-color: #f9fafb;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #10b981;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.submit-btn {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  align-self: center;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 10px;
+}
+
+.submit-btn:hover {
+  background-color: #059669;
+}

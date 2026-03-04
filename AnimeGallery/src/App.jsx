@@ -27,6 +27,16 @@ function App() {
     );
   };
 
+  // Функція для "Додавання аніме"
+  const addAnime = (newAnime) => {
+    setAnimeList((prevList) => [newAnime, ...prevList]);
+  };
+
+  // Функція для видалення власного аніме
+  const deleteAnime = (id) => {
+    setAnimeList((prevList) => prevList.filter((anime) => anime.id !== id));
+  };
+
   return (
     <div className="app-wrapper">
       <Header 
@@ -40,6 +50,8 @@ function App() {
         toggleFavorite={toggleFavorite} 
         toggleWatched={toggleWatched}
         currentTab={currentTab}
+        onAddAnime={addAnime}
+        onDeleteAnime={deleteAnime}
       />
       <Footer />
     </div>
