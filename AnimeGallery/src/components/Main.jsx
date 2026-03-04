@@ -1,7 +1,8 @@
 import React from 'react';
 import AnimeList from './AnimeList';
 
-const Main = ({data}) => {
+const Main = ({data, toggleFavorite, toggleWatched }) => {
+  
   return (
     <main className="main-content">
 
@@ -12,9 +13,11 @@ const Main = ({data}) => {
 
       <h2 className="gallery-title"> Популярні <span className="title-badge">Рейтинг 8.5+</span></h2>
       
-      <div className="anime-grid">
-        <AnimeList list={data} />
-      </div>
+      <AnimeList 
+        list={data} 
+        onToggleFavorite={toggleFavorite} 
+        onToggleWatched={toggleWatched} 
+      />
     </main>
   );
 };

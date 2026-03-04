@@ -1,12 +1,18 @@
 import React from 'react';
 
-const AnimeCard = ({ title, poster, rating, description, year, episodes, studio, genres }) => {
+const AnimeCard = ({ id, title, poster, rating, description, year, episodes, studio, genres, isFavorite, isWatched, onToggleFavorite, onToggleWatched }) => {
   return (
-    <article className="anime-card">
+    <article className={`anime-card ${isWatched ? 'watched-card' : ''}`}>
       <div className="poster-wrapper">
         <img src={poster} alt={title} className="card-image" />
         <span className="rating-badge">★ {rating}</span>
+      
+        {/* Кнопка лайку */}
+        <button className="favorite-btn" onClick={() => onToggleFavorite(id)}>
+          {isFavorite ? '❤️' : '♡'}
+        </button>
       </div>
+
       <div className="card-content">
         <h3 className="card-title">{title}</h3>
         <p className="card-desc">{description}</p>
@@ -20,6 +26,15 @@ const AnimeCard = ({ title, poster, rating, description, year, episodes, studio,
           <span>{episodes} сер.</span>
           <span>{studio}</span>
         </div>
+
+        {/* Кнопка "Переглянуто" */}
+        <button 
+          className={`watch-status-btn ${isWatched ? 'is-watched' : ''}`}
+          onClick={() => onToggleWatched(id)}
+        >
+          {isWatched ? '✅ Переглянуто' : '👁️ Буду дивитись'}
+        </button>
+
       </div>
     </article>
   );

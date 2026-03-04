@@ -8,7 +8,9 @@ export const animeList = [
     genres: "Екшн, Пригоди",
     year: "2012",
     episodes: "25",
-    studio: "A-1 Pictures"
+    studio: "A-1 Pictures",
+    isFavorite: false,
+    isWatched: false
   },
   {
     id: 2,
@@ -19,7 +21,9 @@ export const animeList = [
     genres: "Екшн, Драма",
     year: "2013",
     episodes: "87",
-    studio: "WIT / MAPPA"
+    studio: "WIT / MAPPA",
+    isFavorite: false,
+    isWatched: false
   },
   {
     id: 3,
@@ -30,6 +34,8 @@ export const animeList = [
     genres: "Екшн, Надприродне",
     year: "2019",
     episodes: "44",
-    studio: "Ufotable"
+    studio: "Ufotable",
+    isFavorite: false,
+    isWatched: false
   }
 ];

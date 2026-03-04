@@ -206,3 +206,65 @@ a {
   border-top: 1px solid #e5e5e5;
   color: #555;
 }
+
+/* Кнопка статусу перегляду (внизу картки) */
+.watch-status-btn {
+  width: 100%;
+  margin-top: 15px;
+  padding: 8px 0;
+  border: none;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  color: #1a1a1a;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.watch-status-btn:hover {
+  background-color: #e5e5e5;
+}
+
+/* Стан, коли аніме переглянуто */
+.watch-status-btn.is-watched {
+  background-color: #10b981; /* Зелений колір */
+  color: white;
+}
+
+.watch-status-btn.is-watched:hover {
+  background-color: #059669; /* Темніший зелений при наведенні */
+}
+
+/* Робимо картку трохи тьмянішою, якщо вона вже переглянута */
+.anime-card.watched-card .card-image {
+  opacity: 0.85; 
+}
+
+/* Кнопка лайку */
+.favorite-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: #ffffff; 
+  border: 1.5px solid #000000; 
+  border-radius: 50%; 
+  width: 34px; 
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: #000000; 
+  font-size: 18px; 
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4); 
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 2;
+}
+
+/* Ефект при наведенні мишки */
+.favorite-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+}

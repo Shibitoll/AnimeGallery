@@ -1,12 +1,16 @@
 import React from 'react';
 import AnimeCard from './AnimeCard';
 
-const AnimeList = ({ list }) => {
+const AnimeList = ({ list, onToggleFavorite, onToggleWatched }) => {
+  
+  if (!list) return <p>Завантаження...</p>;
+
   return (
-    <div className="cards-grid">
+    <div className="anime-grid">
       {list.map((anime) => (
         <AnimeCard 
-            key={anime.id} 
+            key={anime.id}
+            id={anime.id} 
             title={anime.title}
             poster={anime.poster}
             rating={anime.rating}
@@ -16,6 +20,10 @@ const AnimeList = ({ list }) => {
             studio={anime.studio}
             genres={anime.genres}
             status={anime.status}
+            isFavorite={anime.isFavorite} 
+            isWatched={anime.isWatched}   
+            onToggleFavorite={onToggleFavorite} 
+            onToggleWatched={onToggleWatched}
         />
       ))}
     </div>
