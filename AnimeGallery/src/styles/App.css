@@ -1,0 +1,208 @@
+/* GLOBAL */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #f5f6f8;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f6f8;
+  color: #222;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* HEADER */
+.main-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 15px 40px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.main-nav {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-link {
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: 0.2s;
+  font-size: 14px;
+  color: #444;
+}
+
+.nav-link:hover {
+  background-color: #f0f0f0;
+}
+
+.nav-link.active {
+  background-color: #111827;
+  color: white;
+}
+
+/* MAIN CONTENT */
+.main-content {
+  padding: 40px;
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.welcome-section h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.welcome-section p {
+  color: #666;
+}
+
+/* TITLE */
+.gallery-title {
+  font-size: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-badge {
+  background-color: #e5e7eb;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: #333;
+}
+
+/* GRID */
+.anime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+/* CARD */
+.anime-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.anime-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* POSTER */
+.poster-wrapper {
+  position: relative;
+  width: 100%;
+  height: 340px;
+  overflow: hidden;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Rating badge */
+.rating-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #111827;
+  color: #fff;
+  font-size: 13px;
+  padding: 5px 8px;
+  border-radius: 8px;
+}
+
+/* CARD CONTENT */
+.card-content {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card-desc {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Genres */
+.genres-list {
+  margin-top: 5px;
+}
+
+.genre-tag {
+  display: inline-block;
+  background-color: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #444;
+}
+
+/* Footer info */
+.card-footer-info {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+/* FOOTER */
+.app-footer {
+  margin-top: 50px;
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  background-color: #ffffff;
+  border-top: 1px solid #e5e5e5;
+  color: #555;
+}
