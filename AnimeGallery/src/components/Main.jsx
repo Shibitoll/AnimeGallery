@@ -4,7 +4,7 @@ import AddAnimeForm from './AddAnimeForm';
 
 const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDeleteAnime, onUpdateRating }) => {
   
-  // 1. Фільтруємо аніме, з якими була взаємодія (унікальні для користувача)
+  // Фільтруємо аніме, з якими була взаємодія (унікальні для користувача)
   const interactedAnime = data.filter(anime => 
     anime.isFavorite || 
     anime.isWatched || 
@@ -12,15 +12,14 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
     (anime.userRating && anime.userRating !== '0.0')
   );
 
-  // 2. Рахуємо кількість взаємодій та улюблених
+  // Рахуємо кількість взаємодій та улюблених
   const totalInteracted = interactedAnime.length;
   const favoritesCount = data.filter(a => a.isFavorite).length;
   const watchedCount = data.filter(a => a.isWatched).length; // Додаткова метрика
 
-  // ==========================================
-  // 2. ЧЕСНЕ ПОРІВНЯННЯ ОЦІНОК
-  // Відбираємо ТІЛЬКИ ті аніме, які оцінив користувач
-  // ==========================================
+
+  // Порівняння середньої оцінки користувача та системи для аніме, які оцінив користувач
+  // Відбираємо ті аніме, які оцінив користувач
   const ratedAnime = data.filter(a => a.userRating && a.userRating !== '0.0');
 
   // Ваша середня оцінка для цих аніме
@@ -32,6 +31,47 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
   const avgGlobalRating = ratedAnime.length > 0
     ? (ratedAnime.reduce((sum, a) => sum + parseFloat(a.rating), 0) / ratedAnime.length).toFixed(1)
     : '0.0';
+
+  // Статистика для улюблених аніме
+  const favoriteItems = data.filter(a => a.isFavorite);
+  const favoriteRated = favoriteItems.filter(a => a.userRating && a.userRating !== '0.0');
+  
+  const favStats = {
+    count: favoriteItems.length,
+    userAvg: favoriteRated.length > 0 ? (favoriteRated.reduce((sum, a) => sum + parseFloat(a.userRating), 0) / favoriteRated.length).toFixed(1) : '0.0',
+    globalAvg: favoriteRated.length > 0 ? (favoriteRated.reduce((sum, a) => sum + parseFloat(a.rating), 0) / favoriteRated.length).toFixed(1) : '0.0',
+    totalEpisodes: favoriteItems.reduce((sum, a) => sum + (parseInt(a.episodes) || 0), 0),
+    newest: favoriteItems.length > 0 ? Math.max(...favoriteItems.map(a => parseInt(a.year))) : '-',
+    oldest: favoriteItems.length > 0 ? Math.min(...favoriteItems.map(a => parseInt(a.year))) : '-'
+  };
+
+  // Статистика для переглянутих аніме
+  const watchedItems = data.filter(a => a.isWatched);
+  const watchedRated = watchedItems.filter(a => a.userRating && a.userRating !== '0.0');
+
+  const watchedStats = {
+    count: watchedItems.length,
+    userAvg: watchedRated.length > 0 ? (watchedRated.reduce((sum, a) => sum + parseFloat(a.userRating), 0) / watchedRated.length).toFixed(1) : '0.0',
+    globalAvg: watchedRated.length > 0 ? (watchedRated.reduce((sum, a) => sum + parseFloat(a.rating), 0) / watchedRated.length).toFixed(1) : '0.0',
+    totalEpisodes: watchedItems.reduce((sum, a) => sum + (parseInt(a.episodes) || 0), 0),
+    newest: watchedItems.length > 0 ? Math.max(...watchedItems.map(a => parseInt(a.year))) : '-',
+    oldest: watchedItems.length > 0 ? Math.min(...watchedItems.map(a => parseInt(a.year))) : '-'
+  };
+
+  // Функція для пошуку найстарішого та найновішого року випуску
+  const getYearLimits = (items) => {
+    if (items.length === 0) return { oldest: '-', newest: '-' };
+    
+    const years = items.map(a => parseInt(a.year)).filter(y => !isNaN(y));
+    return {
+      oldest: Math.min(...years),
+      newest: Math.max(...years)
+    };
+  };
+
+  // Отримуємо значення для відповідних вкладок
+  const favYears = getYearLimits(data.filter(a => a.isFavorite));
+  const watchedYears = getYearLimits(data.filter(a => a.isWatched));
 
   const favoriteAnime = data.filter(anime => anime.isFavorite);
   const watchedAnime = data.filter(anime => anime.isWatched);
@@ -149,6 +189,70 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
         <>
           <h2 className="gallery-title"> Ваші улюблені аніме <span className="title-badge">{favoriteAnime.length}</span></h2>
           
+          <section className="dashboard-stats">
+            <div className="stat-card">
+              <div className="stat-info">
+                <h4>Улюблених аніме</h4>
+                <span className="stat-value">{favStats.count}</span>
+                <p className="stat-desc">Тільки обрані</p>
+              </div>
+              <div className="stat-icon">❤️</div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-info" style={{ width: '100%' }}>
+                <h4>Середня оцінка (Ваша vs Система)</h4>
+                <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                  <div>
+                    <span className="stat-value" style={{ fontSize: '22px', color: '#8b5cf6' }}>★ {favStats.userAvg}</span>
+                    <p className="stat-desc">Ваша</p>
+                  </div>
+                  <div style={{ width: '1px', background: '#e2e8f0' }}></div>
+                  <div>
+                    <span className="stat-value" style={{ fontSize: '22px', color: '#64748b' }}>★ {favStats.globalAvg}</span>
+                    <p className="stat-desc">Системи</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-info">
+                <h4>Всього епізодів</h4>
+                <span className="stat-value">{favStats.totalEpisodes}</span>
+                <p className="stat-desc">У всіх улюблених</p>
+              </div>
+              <div className="stat-icon">📺</div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-info" style={{ width: '100%' }}>
+                <h4>Часові межі списку</h4>
+                <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                  {/* Найстаріше аніме */}
+                  <div>
+                    <span className="stat-value" style={{ margin: '0', fontSize: '24px', color: '#64748b' }}>
+                      {favYears.oldest} 
+                    </span>
+                    <p className="stat-desc">Найстаріше</p>
+                  </div>
+                  
+                  {/* Розділювач */}
+                  <div style={{ width: '1px', background: '#e2e8f0' }}></div>
+
+                  {/* Найновіше аніме */}
+                  <div>
+                    <span className="stat-value" style={{ margin: '0', fontSize: '24px', color: '#6366f1' }}>
+                      {favYears.newest}
+                    </span>
+                    <p className="stat-desc">Найновіше</p>
+                  </div>
+                </div>
+              </div>
+              <div className="stat-icon">📅</div>
+            </div>
+          </section>
+
           {favoriteAnime.length > 0 ? (
             <AnimeList list={favoriteAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
           ) : (
@@ -164,6 +268,70 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
         <>
           <h2 className="gallery-title"> Переглянуті аніме <span className="title-badge">{watchedAnime.length}</span></h2>
           
+          <section className="dashboard-stats">
+            <div className="stat-card">
+              <div className="stat-info">
+                <h4>Переглянуті аніме</h4>
+                <span className="stat-value">{watchedStats.count}</span>
+                <p className="stat-desc">Тільки переглянуті</p>
+              </div>
+              <div className="stat-icon">👁️</div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-info" style={{ width: '100%' }}>
+                <h4>Середня оцінка (Ваша vs Система)</h4>
+                <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                  <div>
+                    <span className="stat-value" style={{ fontSize: '22px', color: '#8b5cf6' }}>★ {watchedStats.userAvg}</span>
+                    <p className="stat-desc">Ваша</p>
+                  </div>
+                  <div style={{ width: '1px', background: '#e2e8f0' }}></div>
+                  <div>
+                    <span className="stat-value" style={{ fontSize: '22px', color: '#64748b' }}>★ {watchedStats.globalAvg}</span>
+                    <p className="stat-desc">Системи</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-info">
+                <h4>Всього епізодів</h4>
+                <span className="stat-value">{watchedStats.totalEpisodes}</span>
+                <p className="stat-desc">У всіх переглянутих</p>
+              </div>
+              <div className="stat-icon">📺</div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-info" style={{ width: '100%' }}>
+                <h4>Часові межі списку</h4>
+                <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                  {/* Найстаріше аніме */}
+                  <div>
+                    <span className="stat-value" style={{ margin: '0', fontSize: '24px', color: '#64748b' }}>
+                      {watchedYears.oldest} 
+                    </span>
+                    <p className="stat-desc">Найстаріше</p>
+                  </div>
+                  
+                  {/* Розділювач */}
+                  <div style={{ width: '1px', background: '#e2e8f0' }}></div>
+
+                  {/* Найновіше аніме */}
+                  <div>
+                    <span className="stat-value" style={{ margin: '0', fontSize: '24px', color: '#6366f1' }}>
+                      {watchedYears.newest} 
+                    </span>
+                    <p className="stat-desc">Найновіше</p>
+                  </div>
+                </div>
+              </div>
+              <div className="stat-icon">📅</div>
+            </div>
+          </section>
+
           {watchedAnime.length > 0 ? (
             <AnimeList list={watchedAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
           ) : (
