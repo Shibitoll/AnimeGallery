@@ -34,7 +34,11 @@ function App() {
 
   // Функція для видалення власного аніме
   const deleteAnime = (id) => {
-    setAnimeList((prevList) => prevList.filter((anime) => anime.id !== id));
+    const isConfirmed = window.confirm("Ви впевнені, що хочете видалити це аніме зі своєї колекції? Цю дію неможливо буде скасувати.");
+
+    if (isConfirmed) {
+      setAnimeList((prevList) => prevList.filter((anime) => anime.id !== id));
+    };
   };
 
   return (
