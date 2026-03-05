@@ -4,6 +4,35 @@ import AddAnimeForm from './AddAnimeForm';
 
 const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDeleteAnime, onUpdateRating }) => {
   
+  // 1. Фільтруємо аніме, з якими була взаємодія (унікальні для користувача)
+  const interactedAnime = data.filter(anime => 
+    anime.isFavorite || 
+    anime.isWatched || 
+    anime.isAddedByUser || 
+    (anime.userRating && anime.userRating !== '0.0')
+  );
+
+  // 2. Рахуємо кількість взаємодій та улюблених
+  const totalInteracted = interactedAnime.length;
+  const favoritesCount = data.filter(a => a.isFavorite).length;
+  const watchedCount = data.filter(a => a.isWatched).length; // Додаткова метрика
+
+  // ==========================================
+  // 2. ЧЕСНЕ ПОРІВНЯННЯ ОЦІНОК
+  // Відбираємо ТІЛЬКИ ті аніме, які оцінив користувач
+  // ==========================================
+  const ratedAnime = data.filter(a => a.userRating && a.userRating !== '0.0');
+
+  // Ваша середня оцінка для цих аніме
+  const avgUserRating = ratedAnime.length > 0 
+    ? (ratedAnime.reduce((sum, a) => sum + parseFloat(a.userRating), 0) / ratedAnime.length).toFixed(1) 
+    : '0.0';
+
+  // Середня оцінка системи для ТИХ ЖЕ САМИХ аніме
+  const avgGlobalRating = ratedAnime.length > 0
+    ? (ratedAnime.reduce((sum, a) => sum + parseFloat(a.rating), 0) / ratedAnime.length).toFixed(1)
+    : '0.0';
+
   const favoriteAnime = data.filter(anime => anime.isFavorite);
   const watchedAnime = data.filter(anime => anime.isWatched);
 
@@ -21,6 +50,62 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
             <p>Відкрийте для себе найкращі аніме, оцінюйте та створюйте власну колекцію.</p>
           </section>
            
+          {/* НОВА СЕКЦІЯ СТАТИСТИКИ */}
+        <section className="dashboard-stats">
+          <div className="stat-card">
+            <div className="stat-info">
+              <h4>Ваш каталог</h4>
+              <span className="stat-value">{totalInteracted}</span>
+              <p className="stat-desc">Збережених тайтлів</p>
+            </div>
+            <div className="stat-icon">📚</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-info" style={{ width: '100%' }}>
+              <h4>Оцінка (Ваша vs Система)</h4>
+              <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                {/* Ваша оцінка */}
+                <div>
+                  <span className="stat-value" style={{ margin: '0', fontSize: '24px', color: '#8b5cf6' }}>
+                    ★ {avgUserRating}
+                  </span>
+                  <p className="stat-desc">Ваша</p>
+                </div>
+                
+                {/* Вертикальна лінія-розділювач */}
+                <div style={{ width: '1px', background: '#e2e8f0' }}></div>
+
+                {/* Оцінка системи */}
+                <div>
+                  <span className="stat-value" style={{ margin: '0', fontSize: '24px', color: '#64748b' }}>
+                    ★ {avgGlobalRating}
+                  </span>
+                  <p className="stat-desc">Системи</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-info">
+              <h4>Переглянуто</h4>
+              <span className="stat-value">{watchedCount}</span>
+              <p className="stat-desc">Завершених аніме</p>
+            </div>
+            <div className="stat-icon">✅</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-info">
+              <h4>Улюблені</h4>
+              <span className="stat-value">{favoritesCount}</span>
+              <p className="stat-desc">У серденьку</p>
+            </div>
+            <div className="stat-icon">❤️</div>
+          </div>
+        </section>
+
           {/* Блок популярних аніме на головній (показуємо, якщо є) */}
           <h2 className="gallery-title"> Популярні <span className="title-badge">Рейтинг 8.5+</span></h2>
           <AnimeList list={popularAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
