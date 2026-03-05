@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { animeList as initialAnimeList } from './data/data';
 import Header from './components/Header';
 import Main from './components/Main';
@@ -6,8 +6,21 @@ import Footer from './components/Footer';
 import './styles/App.css';
 
 function App() {
-  const [animeList, setAnimeList] = useState(initialAnimeList);
+  // Лінива ініціалізація (отримуємо дані з localStorage або використовуємо початкові)
+  const [animeList, setAnimeList] = useState(() => {
+    const savedData = localStorage.getItem('anime-data');
+    if (savedData) {
+      return JSON.parse(savedData); 
+    }
+    return initialAnimeList; 
+  });
+
   const [currentTab, setCurrentTab] = useState('home');
+  
+  // Збереження даних (при кожній зміні)
+  useEffect(() => {
+    localStorage.setItem('anime-data', JSON.stringify(animeList));
+  }, [animeList]); 
 
   // Функція для лайків
   const toggleFavorite = (id) => {
