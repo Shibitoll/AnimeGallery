@@ -1,7 +1,7 @@
 import React from 'react';
 import AnimeCard from './AnimeCard';
 
-const AnimeList = ({ list, onToggleFavorite, onToggleWatched, onDeleteAnime }) => {
+const AnimeList = ({ list, onToggleFavorite, onToggleWatched, onDeleteAnime, onUpdateRating }) => {
   
   if (!list) return <p>Завантаження...</p>;
 
@@ -14,6 +14,7 @@ const AnimeList = ({ list, onToggleFavorite, onToggleWatched, onDeleteAnime }) =
             title={anime.title}
             poster={anime.poster}
             rating={anime.rating}
+            userRating={anime.userRating}
             description={anime.description}
             year={anime.year}
             episodes={anime.episodes}
@@ -26,6 +27,7 @@ const AnimeList = ({ list, onToggleFavorite, onToggleWatched, onDeleteAnime }) =
             onToggleWatched={onToggleWatched}
             isAddedByUser={anime.isAddedByUser}
             onDeleteAnime={onDeleteAnime}
+            onUpdateRating={onUpdateRating}
         />
       ))}
     </div>

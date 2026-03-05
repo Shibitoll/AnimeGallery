@@ -1,11 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const AnimeCard = ({ id, title, poster, rating, description, year, episodes, studio, genres, isFavorite, isWatched, onToggleFavorite, onToggleWatched, isAddedByUser, onDeleteAnime }) => {
+const AnimeCard = ({ id, title, poster, rating, userRating, description, year, episodes, studio, genres, isFavorite, isWatched, onToggleFavorite, onToggleWatched, isAddedByUser, onDeleteAnime, onUpdateRating }) => {
+  // Якщо userRating ще не встановлено, показуємо "0.0"
+  const personalRating = userRating !== undefined ? userRating : '0.0';
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempRating, setTempRating] = useState(personalRating);
+
+  const handleSave = () => {
+    const numRating = parseFloat(tempRating);
+    if (isNaN(numRating) || numRating < 0 || numRating > 10) {
+      alert("Будь ласка, введіть число від 0 до 10");
+      return;
+    }
+    onUpdateRating(id, numRating.toFixed(1));
+    setIsEditing(false);
+  };
+  
   return (
     <article className={`anime-card ${isWatched ? 'watched-card' : ''}`}>
       <div className="poster-wrapper">
         <img src={poster} alt={title} className="card-image" />
-        <span className="rating-badge">★ {rating}</span>
+        <span className="rating-badge" title="Загальний рейтинг">★ {rating}</span>
       
         {/* Кнопка лайку */}
         <button className="favorite-btn" onClick={() => onToggleFavorite(id)}>
@@ -22,7 +38,6 @@ const AnimeCard = ({ id, title, poster, rating, description, year, episodes, stu
             🗑️
           </button>
         )}
-
       </div>
 
       <div className="card-content">
@@ -46,6 +61,32 @@ const AnimeCard = ({ id, title, poster, rating, description, year, episodes, stu
         >
           {isWatched ? '✅ Переглянуто' : '👁️ Буду дивитись'}
         </button>
+
+        {/* Секція власної оцінки */}
+        <div className="user-rating-section">
+          <p>Ваша оцінка: 
+            {isEditing ? (
+              <input 
+                type="number" 
+                step="0.1" 
+                min="0" 
+                max="10" 
+                value={tempRating} 
+                onChange={(e) => setTempRating(e.target.value)}
+                className="rating-input"
+              />
+            ) : (
+              <strong> {personalRating}</strong>
+            )}
+          </p>
+          
+          <button 
+            className="edit-rating-btn" 
+            onClick={isEditing ? handleSave : () => setIsEditing(true)}
+          >
+            {isEditing ? 'Зберегти зміни' : 'Бажаєте змінити?'}
+          </button>
+        </div>
 
       </div>
     </article>

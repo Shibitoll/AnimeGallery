@@ -16,7 +16,7 @@ function App() {
   });
 
   const [currentTab, setCurrentTab] = useState('home');
-  
+
   // Збереження даних (при кожній зміні)
   useEffect(() => {
     localStorage.setItem('anime-data', JSON.stringify(animeList));
@@ -54,6 +54,15 @@ function App() {
     };
   };
 
+  // Функція для оновлення власної оцінки користувача 
+  const updateRating = (id, newRating) => {
+    setAnimeList((prevList) => 
+      prevList.map((anime) => 
+        anime.id === id ? { ...anime, userRating: newRating } : anime
+      )
+    );
+  };
+
   return (
     <div className="app-wrapper">
       <Header 
@@ -69,6 +78,7 @@ function App() {
         currentTab={currentTab}
         onAddAnime={addAnime}
         onDeleteAnime={deleteAnime}
+        onUpdateRating={updateRating}
       />
       <Footer />
     </div>

@@ -313,3 +313,68 @@ a {
   background-color: #fee2e2; 
   transform: scale(1.15);
 }
+
+/* Контейнер для секції оцінки */
+.user-rating-section {
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px dashed #e2e8f0; /* Пунктирна лінія відділяє секцію */
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Центруємо вміст */
+}
+
+.user-rating-section p {
+  margin: 0 0 8px 0;
+  color: #475569;
+}
+
+.user-rating-section strong {
+  color: #1e293b;
+  font-size: 16px;
+  margin-left: 4px;
+}
+
+/* Поле вводу оцінки */
+.rating-input {
+  width: 60px;
+  padding: 4px 8px;
+  margin-left: 8px;
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s ease;
+  text-align: center;
+}
+
+.rating-input:focus {
+  border-color: #8b5cf6; /* Підсвічується фіолетовим при введенні */
+}
+
+/* Кнопка "Бажаєте змінити?" / "Зберегти" */
+.edit-rating-btn {
+  background: transparent;
+  border: 1px solid #000000;
+  color: #100921;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.edit-rating-btn:hover {
+  background: #100921;
+  color: white;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.edit-rating-btn:active {
+  transform: scale(0.96);
+}

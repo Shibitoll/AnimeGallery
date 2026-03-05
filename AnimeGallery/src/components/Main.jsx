@@ -2,7 +2,7 @@ import React from 'react';
 import AnimeList from './AnimeList';
 import AddAnimeForm from './AddAnimeForm';
 
-const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDeleteAnime }) => {
+const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDeleteAnime, onUpdateRating }) => {
   
   const favoriteAnime = data.filter(anime => anime.isFavorite);
   const watchedAnime = data.filter(anime => anime.isWatched);
@@ -23,13 +23,13 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
            
           {/* Блок популярних аніме на головній (показуємо, якщо є) */}
           <h2 className="gallery-title"> Популярні <span className="title-badge">Рейтинг 8.5+</span></h2>
-          <AnimeList list={popularAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime}/>
+          <AnimeList list={popularAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
 
           {/* Блок аніме користувача на головній (показуємо, якщо є додані користувачем) */}
           {myAnimeList.length > 0 && (
             <div className="category-section">
               <h2 className="gallery-title"> Мої додані аніме <span className="title-badge" style={{backgroundColor: '#10b981', color: '#fff'}}>{myAnimeList.length}</span></h2>
-              <AnimeList list={myAnimeList} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} />
+              <AnimeList list={myAnimeList} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
             </div>
           )}
 
@@ -37,7 +37,7 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
           {favoriteAnime.length > 0 && (
             <div className="category-section">
               <h2 className="gallery-title"> Улюблені <span className="title-badge">{favoriteAnime.length}</span></h2>
-              <AnimeList list={favoriteAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} />
+              <AnimeList list={favoriteAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
             </div>
           )}
 
@@ -45,7 +45,7 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
           {watchedAnime.length > 0 && (
             <div className="category-section">
               <h2 className="gallery-title"> Переглянуті <span className="title-badge">{watchedAnime.length}</span></h2>
-              <AnimeList list={watchedAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} />
+              <AnimeList list={watchedAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
             </div>
           )}
         </>
@@ -55,7 +55,7 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
       {currentTab === 'popular' && (
         <>
           <h2 className="gallery-title"> Усі популярні аніме <span className="title-badge">{data.length}</span></h2>
-          <AnimeList list={popularAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} />
+          <AnimeList list={popularAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
         </>
       )}
 
@@ -65,7 +65,7 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
           <h2 className="gallery-title"> Ваші улюблені аніме <span className="title-badge">{favoriteAnime.length}</span></h2>
           
           {favoriteAnime.length > 0 ? (
-            <AnimeList list={favoriteAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} />
+            <AnimeList list={favoriteAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
           ) : (
             <p className="empty-message">
               Список порожній. Перейдіть на Головну сторінку та натисніть ♡ на картці, щоб додати аніме.
@@ -80,7 +80,7 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
           <h2 className="gallery-title"> Переглянуті аніме <span className="title-badge">{watchedAnime.length}</span></h2>
           
           {watchedAnime.length > 0 ? (
-            <AnimeList list={watchedAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} />
+            <AnimeList list={watchedAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
           ) : (
             <p className="empty-message">
               У вас ще немає переглянутих аніме. Відмітьте аніме галочкою "✅ Переглянуто", коли подивитесь його.
@@ -103,7 +103,7 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
           {myAnimeList.length > 0 && (
             <div className="category-section" style={{marginTop: '40px'}}>
               <h2 className="gallery-title"> Додані вами аніме </h2>
-              <AnimeList list={myAnimeList} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} />
+              <AnimeList list={myAnimeList} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
             </div>
           )}
         </div>
