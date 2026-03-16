@@ -1,16 +1,56 @@
-# React + Vite
+# ANIME GALLERY 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**AnimeGallery** — це інтелектуальна інформаційна вебсистема, спроєктована для комплексної каталогізації, модерації та верифікації аніме-контенту. Архітектура застосунку орієнтована на забезпечення персоналізованого користувацького досвіду через механізми управління бібліотекою та інтерактивні інструменти соціальної взаємодії.
 
-Currently, two official plugins are available:
+### Ключові функціональні можливості
+* **Багатофакторна каталогізація:** розширений пошук та прецизійна фільтрація контенту за метаданими (жанрова належність, часові періоди, рейтингові показники).
+* **Менеджмент персональних медіатек:** динамічне управління статусами перегляду та структурування власної бази даних.
+* **Інтерактивна взаємодія:** система валідації контенту через користувацьке оцінювання та публікацію експертних рецензій.
+* **Адміністративна модерація:** інструментарій для забезпечення достовірності інформаційних активів та контролю якості текстового контенту.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Технологічний стек
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Frontend & UI
+* **React 19** (інструментарій збірки **Vite**) — високоефективна бібліотека для створення декларативних інтерфейсів.
+* **Component-Based Architecture** — архітектурний підхід, що базується на перевикористанні модульних компонентів.
+* **Modern CSS3** — впровадження адаптивної верстки та модульної ізоляції стилів.
+* **ESLint** — статичний аналіз коду для забезпечення високої якості та відповідності галузевим стандартам.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Структура проєкту
+
+| Директорія / Файл | Технічне призначення |
+| :--- | :--- |
+| `/public` | Депозитарій статичних ресурсів та константних медіафайлів. |
+| `/src/assets` | Активи проєкту, що інтегруються безпосередньо в об'єктну модель. |
+| `/src/components` | Бібліотека реактивних UI-компонентів, що формують ієрархію інтерфейсу. |
+| `/src/data` | Рівень абстракції даних (Data Layer) для локального збереження інформаційних об'єктів. |
+| `/src/styles` | Ізольовані модулі каскадних таблиць стилів для візуального представлення компонентів. |
+
+---
+
+## Розгортання та запуск
+
+### Клієнтська частина (Frontend)
+```bash
+# Клонування репозиторію та перехід у кореневий каталог
+cd AnimeGallery
+
+# Встановлення необхідних пакетів залежностей
+npm install
+
+# Запуск локального сервера розробки з гарячим перезавантаженням (HMR)
+npm run dev
+```
+
+---
+
+## Ліцензія
+Проєкт розповсюджується під ліцензією MIT. Повний текст доступний у файлі LICENSE.
+
+---
+
+## Розробник: Bondariev Ivan
