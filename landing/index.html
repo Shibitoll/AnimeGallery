@@ -1,65 +1,79 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" prefix="og: https://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     
-    <title>AnimeGallery | Landing Page</title>
-    <meta name="description" content="Презентація бакалаврської роботи: Інформаційна вебсистема каталогізації аніме-контенту.">
-    <meta name="keywords" content="AnimeGallery, бакалаврська робота, React, Django, аніме каталог">
+    <title>AnimeGallery | Вебсистема каталогізації аніме</title>
+    <meta name="description" content="Бакалаврська робота: розробка системи AnimeGallery для каталогізації аніме. Мета — автоматизація обліку та модерації медіаконтенту.">
+    <meta name="keywords" content="аніме, каталогізація, бакалаврська робота, React, Django, інформаційна система, AnimeGallery">
     <meta name="author" content="Бондарєв Іван">
+
+    <meta property="og:title" content="AnimeGallery — Бакалаврський проєкт Івана Бондарєва" />
+    <meta property="og:image" content="./favicon/preview.png" />
+    <meta property="og:type" content="website" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      "name": "AnimeGallery",
+      "alternateName": "Information Web System for Anime Content Cataloging",
+      "author": { "@type": "Person", "name": "Іван Бондарєв" }
+    }
+    </script>
 
     <link rel="apple-touch-icon" sizes="180x180" href="./favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="./favicon/favicon-16x16.png">
-    <link rel="shortcut icon" href="./favicon/favicon.ico" type="image/x-icon">
-
     <link rel="stylesheet" href="./index.css">
 </head>
 <body>
 
-    <header>
+    <header role="banner">
         <div class="container">
-            <img src="./favicon/uni-logo.png" alt="Логотип університету" class="uni-logo">
+            <img src="./favicon/uni-logo.png" alt="Логотип університету розробника" class="uni-logo" width="120" height="120">
+            
             <h1>AnimeGallery — Інформаційна вебсистема каталогізації аніме-контенту</h1>
-            <p lang="en"><em>Development of the Information Web System for Anime Content Cataloging</em></p>
+            <p lang="en" style="color: #666;"><em>Information Web System for Anime Content Cataloging</em></p>
         </div>
     </header>
 
-    <main class="container">
-        <section id="abstract">
-            <h2>Короткий опис</h2>
-            <p>Проєкт присвячений створенню інтелектуальної вебплатформи для систематизації аніме-індустрії. Система забезпечує зручний пошук, модерацію та формування персональних списків користувачів.</p>
+    <main class="container" role="main">
+        
+        <section id="abstract" aria-labelledby="h2-abstract">
+            <h2 id="h2-abstract">Короткий опис проєкту</h2>
+            <p>AnimeGallery — це інтелектуальна вебсистема для комплексної каталогізації, модерації та верифікації аніме. Проєкт забезпечує персоналізований досвід через механізми управління медіатекою та інструменти соціальної взаємодії для шанувальників аніме-індустрії.</p>
         </section>
 
-        <section id="goal">
-            <h2>Мета дослідження</h2>
-            <p>Проєктування та розробка функціональної інформаційної вебсистеми, що оптимізує процес управління медіаконтентом та персоналізацію досвіду шанувальників аніме.</p>
+        <section id="goal" aria-labelledby="h2-goal">
+            <h2 id="h2-goal">Мета дослідження</h2>
+            <p>Проєктування та програмна реалізація вебплатформи, що оптимізує процеси систематизації інформаційних активів та покращує взаємодію користувачів із медіаконтентом.</p>
         </section>
 
-        <section id="tasks">
-            <h2>Основні завдання</h2>
-            <ul>
-                <li>Провести системний аналіз предметної області.</li>
-                <li>Спроєктувати архітектуру реляційної бази даних.</li>
-                <li>Розробити інтерактивний інтерфейс на базі React.</li>
-                <li>Реалізувати серверне API засобами Django.</li>
+        <section id="tasks" aria-labelledby="h2-tasks">
+            <h2 id="h2-tasks">Основні завдання</h2>
+            <ul role="list">
+                <li>Системний аналіз предметної області та існуючих рішень.</li>
+                <li>Проєктування архітектури бази даних для великих обсягів метаданих.</li>
+                <li>Розробка інтерфейсу користувача (UI) з використанням React 19.</li>
+                <li>Реалізація серверної логіки та API засобами фреймворку Django.</li>
             </ul>
         </section>
 
-        <section id="results">
-            <h2>Очікувані результати</h2>
-            <p>Діючий вебсервіс із сучасним UX/UI, підтримкою модерації та інтеграцією зовнішніх API даних.</p>
-            <img src="./favicon/preview.png" alt="Графічне представлення AnimeGallery" class="preview-img">
+        <section id="results" aria-labelledby="h2-results">
+            <h2 id="h2-results">Очікувані результати</h2>
+            <p>Створення масштабованої системи з високою швидкістю завантаження, інструментами оцінювання контенту та надійним адміністративним інтерфейсом модерації.</p>
+            
+            <img src="./favicon/preview.png" alt="Графічна візуалізація структури та інтерфейсу системи AnimeGallery" class="preview-img" loading="lazy">
         </section>
     </main>
 
-    <footer>
+    <footer role="contentinfo">
         <div class="container">
             <h2>Контактна інформація</h2>
-            <p>Розробник: Бондарєв Іван</p>
-            <p>Email: ibond0550@gmail.com</p>
+            <p>Розробник: <strong>Бондарєв Іван</strong></p>
+            <p>Email: <a href="mailto:ibond0550@gmail.com" aria-label="Надіслати листа автору">ibond0550@gmail.com</a></p>
         </div>
     </footer>
 
