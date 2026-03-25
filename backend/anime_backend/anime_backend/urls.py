@@ -1,6 +1,6 @@
 from django.contrib import admin
-from django.urls import path, include
-from user_api.views import RegisterView # Імпортуємо наше представлення
+from django.urls import include, path
+from user_api.views import RegisterView  # Імпортуємо наше представлення
 
 urlpatterns = [
     path('admin/', admin.site.urls),

@@ -1,5 +1,6 @@
-from rest_framework import serializers
 from django.contrib.auth.models import User
+from rest_framework import serializers
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     # write_only=True — щоб пароль ніколи не повертався у відповіді API
