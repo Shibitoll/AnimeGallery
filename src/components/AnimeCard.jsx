@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState} from 'react';
 
 const AnimeCard = ({ 
   id, title, poster, rating, userRating, description, year, episodes, 
@@ -11,11 +11,12 @@ const AnimeCard = ({
   const [isEditing, setIsEditing] = useState(false);
   const [tempRating, setTempRating] = useState(displayUserRating);
 
-useEffect(() => {
-  if (tempRating !== displayUserRating) {
-    setTempRating(displayUserRating);
-  }
-}, [displayUserRating]);
+const [prevRating, setPrevRating] = useState(displayUserRating);
+
+if (displayUserRating !== prevRating) {
+  setPrevRating(displayUserRating);
+  setTempRating(displayUserRating);
+}
 
   const handleSave = () => {
     const numRating = parseFloat(tempRating);

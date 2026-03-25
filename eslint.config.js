@@ -5,7 +5,9 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // 1. Ігнорування файлів та директорій, які не повинні перевірятися
+  globalIgnores(['dist', 'node_modules', 'landing', 'backend', 'eslint.config.js']),
+  
   {
     files: ['**/*.{js,jsx}'],
     extends: [
@@ -22,8 +24,16 @@ export default defineConfig([
         sourceType: 'module',
       },
     },
+    // 2. Базові правила лінтингу під потреби проєкту
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Стиль та чистота: попереджати про оголошені змінні, які не використовуються
+      'no-unused-vars': ['warn', { varsIgnorePattern: '^[A-Z_]' }],
+      
+      // Надійність: суворо вимагати строге порівняння (=== замість ==)
+      'eqeqeq': 'error',
+      
+      // Продуктивність: попереджати про залишені відлагоджувальні console.log
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
 ])
