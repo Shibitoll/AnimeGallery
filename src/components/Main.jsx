@@ -4,13 +4,21 @@ import AddAnimeForm from './AddAnimeForm';
 
 const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDeleteAnime, onUpdateRating }) => {
   
+
+if (!data || data.length === 0) {
+    return (
+      <main className="main-content">
+        <p>Завантаження даних або список порожній...</p>
+      </main>
+    );
+  }
+  
   // Фільтруємо аніме, з якими була взаємодія (унікальні для користувача)
-  const interactedAnime = data.filter(anime => 
-    anime.isFavorite || 
-    anime.isWatched || 
-    anime.isAddedByUser || 
-    (anime.userRating && anime.userRating !== '0.0')
-  );
+const interactedAnime = data.filter(anime => 
+  anime.isFavorite ||
+  anime.isWatched ||
+  (anime.userRating && anime.userRating !== '0.0')
+);
 
   // Рахуємо кількість взаємодій та улюблених
   const totalInteracted = interactedAnime.length;

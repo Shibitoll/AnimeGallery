@@ -10,19 +10,7 @@ const AnimeList = ({ list, onToggleFavorite, onToggleWatched, onDeleteAnime, onU
       {list.map((anime) => (
         <AnimeCard 
             key={anime.id}
-            id={anime.id} 
-            title={anime.title}
-            poster={anime.poster}
-            rating={anime.rating}
-            userRating={anime.userRating}
-            description={anime.description}
-            year={anime.year}
-            episodes={anime.episodes}
-            studio={anime.studio}
-            genres={anime.genres}
-            status={anime.status}
-            isFavorite={anime.isFavorite} 
-            isWatched={anime.isWatched}   
+            {...anime}
             onToggleFavorite={onToggleFavorite} 
             onToggleWatched={onToggleWatched}
             isAddedByUser={anime.isAddedByUser}

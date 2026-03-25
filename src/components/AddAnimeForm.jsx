@@ -25,7 +25,6 @@ const AddAnimeForm = ({ onAddAnime }) => {
     const generatedPoster = `https://placehold.co/300x420/e5e7eb/4b5563?text=${encodedText}&font=Montserrat`;
 
     const newAnime = {
-      id: Date.now(),
       title: title.trim(),
       poster: poster.trim() || generatedPoster,
       description: description.trim() || 'Власне аніме, додане до особистої колекції. Час відкривати нові світи!',
@@ -34,10 +33,11 @@ const AddAnimeForm = ({ onAddAnime }) => {
       studio: studio.trim() || 'Таємна студія',
       genres: genres.trim() || 'Жанр невідомий',
       rating: rating.trim() || '0.0',
+      userRating: rating.trim() || '0.0',
       status: status === 'watched' ? 'Завершено' : 'Онгоінг',
       isFavorite: false,
       isWatched: status === 'watched',
-      isAddedByUser: true // Спеціальний прапорець, щоб відрізнити аніме користувача від бази
+      isAddedByUser: true
     };
 
     onAddAnime(newAnime);

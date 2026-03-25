@@ -33,3 +33,14 @@ dist-ssr
 # Windows системні файли
 Thumbs.db
 desktop.ini
+
+# Python / Django
+pycache/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+db.sqlite3
+/media/
+/staticfiles/

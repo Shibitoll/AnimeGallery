@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const AnimeCard = ({ id, title, poster, rating, userRating, description, year, episodes, studio, genres, isFavorite, isWatched, onToggleFavorite, onToggleWatched, isAddedByUser, onDeleteAnime, onUpdateRating }) => {
-  // Якщо userRating ще не встановлено, показуємо "0.0"
-  const personalRating = userRating !== undefined ? userRating : '0.0';
+const AnimeCard = ({ 
+  id, title, poster, rating, userRating, description, year, episodes, 
+  studio, genres, isFavorite, isWatched, onToggleFavorite, 
+  onToggleWatched, isAddedByUser, onDeleteAnime, onUpdateRating 
+}) => {
+  
+  const displayUserRating = userRating ? parseFloat(userRating).toFixed(1) : '0.0';
   
   const [isEditing, setIsEditing] = useState(false);
-  const [tempRating, setTempRating] = useState(personalRating);
+  const [tempRating, setTempRating] = useState(displayUserRating);
+
+useEffect(() => {
+  if (tempRating !== displayUserRating) {
+    setTempRating(displayUserRating);
+  }
+}, [displayUserRating]);
 
   const handleSave = () => {
     const numRating = parseFloat(tempRating);
@@ -23,19 +33,23 @@ const AnimeCard = ({ id, title, poster, rating, userRating, description, year, e
         <img src={poster} alt={title} className="card-image" />
         <span className="rating-badge" title="Загальний рейтинг">★ {rating}</span>
       
-        {/* Кнопка лайку */}
-        <button className="favorite-btn" onClick={() => onToggleFavorite(id)}>
+        {/* Кнопка лайку — додано клас 'active' для стилізації */}
+        <button 
+          className={`favorite-btn ${isFavorite ? 'active' : ''}`} 
+          onClick={() => onToggleFavorite(id)}
+          title={isFavorite ? "Прибрати з улюблених" : "Додати в улюблені"}
+        >
           {isFavorite ? '❤️' : '♡'}
         </button>
 
-        {/* Кнопка видалення (з'являється тільки для доданих користувачем) */}
+        {/* Кнопка видалення */}
         {isAddedByUser && (
           <button 
             className="delete-btn" 
             onClick={() => onDeleteAnime(id)}
             title="Видалити аніме"
           >
-            🗑️
+            🗑
           </button>
         )}
       </div>
@@ -54,15 +68,14 @@ const AnimeCard = ({ id, title, poster, rating, userRating, description, year, e
           <span>{studio}</span>
         </div>
 
-        {/* Кнопка "Переглянуто" */}
+        {/* Кнопка "Переглянуто" — динамічний текст та іконка */}
         <button 
           className={`watch-status-btn ${isWatched ? 'is-watched' : ''}`}
           onClick={() => onToggleWatched(id)}
         >
-          {isWatched ? '✅ Переглянуто' : '👁️ Буду дивитись'}
+          {isWatched ? '✅ Переглянуто' : '👁 Буду дивитись'}
         </button>
 
-        {/* Секція власної оцінки */}
         <div className="user-rating-section">
           <p>Ваша оцінка: 
             {isEditing ? (
@@ -74,20 +87,20 @@ const AnimeCard = ({ id, title, poster, rating, userRating, description, year, e
                 value={tempRating} 
                 onChange={(e) => setTempRating(e.target.value)}
                 className="rating-input"
+                autoFocus
               />
             ) : (
-              <strong> {personalRating}</strong>
+              <strong className="user-score"> {displayUserRating}</strong>
             )}
           </p>
           
           <button 
-            className="edit-rating-btn" 
+            className={`edit-rating-btn ${isEditing ? 'saving' : ''}`} 
             onClick={isEditing ? handleSave : () => setIsEditing(true)}
           >
-            {isEditing ? 'Зберегти зміни' : 'Бажаєте змінити?'}
+            {isEditing ? '💾 Зберегти' : '✎ Змінити оцінку'}
           </button>
         </div>
-
       </div>
     </article>
   );
