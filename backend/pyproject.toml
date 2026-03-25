@@ -1,0 +1,30 @@
+[tool.ruff]
+# Загальні налаштування мають бути тут
+line-length = 150
+target-version = "py312"
+
+# Ігноруємо специфічні директорії
+exclude = [
+    ".git",
+    "__pycache__",
+    "env",
+    "venv",
+    "migrations",
+]
+
+[tool.ruff.lint]
+# Базові правила перевірки (linter): E (стиль pycodestyle), F (логічні помилки Pyflakes), I (сортування імпортів)
+select = ["E", "F", "I"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# Ігноруємо невикористані імпорти в __init__.py файлах
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main"]
+ignore_missing_imports = true
+exclude = ["migrations", "venv", "env"]
+
+[tool.django-stubs]
+django_settings_module = "backend.settings"
