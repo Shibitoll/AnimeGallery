@@ -4,6 +4,11 @@ import Main from './components/Main';
 import Footer from './components/Footer';
 import './styles/App.css';
 
+/**
+ * Головний компонент застосунку AnimeGallery.
+ * Управляє глобальним станом списку аніме, навігацією та взаємодією з API.
+ * * @component
+ */
 function App() {
   const [animeList, setAnimeList] = useState([]);
   const [currentTab, setCurrentTab] = useState('home');
@@ -11,7 +16,10 @@ function App() {
 
   const API_URL = 'http://127.0.0.1:8000/api/animes/';
 
-  // 1. Завантаження даних з бекенду при запуску
+/**
+   * Завантажує список аніме з бекенду при першому рендері.
+   * @async
+   */
   useEffect(() => {
     const fetchAnime = async () => {
       try {
@@ -28,7 +36,11 @@ function App() {
     fetchAnime();
   }, []);
 
-  // 2. Функція для перемикання "Улюблене" (PATCH)
+/**
+   * Оновлює статус "Улюблене" для конкретного аніме.
+   * @async
+   * @param {number} id - Унікальний ідентифікатор аніме.
+   */
   const toggleFavorite = async (id) => {
     const anime = animeList.find(a => a.id === id);
     try {
@@ -46,7 +58,11 @@ function App() {
     }
   };
 
-  // 3. Функція для перемикання "Переглянуто" (PATCH)
+/**
+   * Оновлює статус "Переглянуто" для конкретного аніме через PATCH-запит.
+   * * @async
+   * @param {number} id - Унікальний ідентифікатор аніме.
+   */
   const toggleWatched = async (id) => {
     const anime = animeList.find(a => a.id === id);
     try {
@@ -64,7 +80,11 @@ function App() {
     }
   };
 
-  // 4. Функція для додавання нового аніме (POST)
+/**
+   * Додає новий запис аніме до бази даних.
+   * @async
+   * @param {Object} newAnime - Об'єкт з даними нового аніме.
+   */
 const addAnime = async (newAnime) => {
   try {
     const response = await fetch(API_URL, {
@@ -85,7 +105,11 @@ const addAnime = async (newAnime) => {
   }
 };
 
-  // 5. Функція для видалення аніме (DELETE)
+/**
+   * Видаляє аніме з бази даних після підтвердження.
+   * @async
+   * @param {number} id - Ідентифікатор аніме для видалення.
+   */
 const deleteAnime = async (id) => {
   const isConfirmed = window.confirm("Ви впевнені, що хочете видалити це аніме?");
   if (!isConfirmed) return;
@@ -108,7 +132,12 @@ const deleteAnime = async (id) => {
   }
 };
 
-  // 6. Функція для оновлення рейтингу користувача (PATCH)
+/**
+   * Оновлює персональну оцінку аніме через PATCH-запит.
+   * * @async
+   * @param {number} id - Ідентифікатор аніме.
+   * @param {number|string} newRating - Нове значення рейтингу (наприклад, 8.5).
+   */
   const updateRating = async (id, newRating) => {
     try {
       const response = await fetch(`${API_URL}${id}/`, {

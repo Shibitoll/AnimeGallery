@@ -2,6 +2,19 @@ import React from 'react';
 import AnimeList from './AnimeList';
 import AddAnimeForm from './AddAnimeForm';
 
+/**
+ * Компонент Main відповідає за відображення контенту залежно від обраної вкладки.
+ * Розраховує статистику користувача та фільтрує списки аніме.
+ * * @component
+ * @param {Object} props - Властивості компонента.
+ * @param {Array} props.data - Повний список аніме з бази даних.
+ * @param {Function} props.toggleFavorite - Функція перемикання статусу "улюблене".
+ * @param {Function} props.toggleWatched - Функція перемикання статусу "переглянуто".
+ * @param {string} props.currentTab - Ідентифікатор активної вкладки (home, popular, favorite, watched, my-anime).
+ * @param {Function} props.onAddAnime - Функція додавання нового аніме.
+ * @param {Function} props.onDeleteAnime - Функція видалення аніме.
+ * @param {Function} props.onUpdateRating - Функція оновлення користувацької оцінки.
+ */
 const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDeleteAnime, onUpdateRating }) => {
   
 
@@ -13,34 +26,43 @@ if (!data || data.length === 0) {
     );
   }
   
-  // Фільтруємо аніме, з якими була взаємодія (унікальні для користувача)
+/** * @type {Array} interactedAnime - Фільтрує аніме, з якими користувач мав будь-яку взаємодію 
+   * (додав у вибране, позначив як переглянуте або поставив оцінку).
+   */
 const interactedAnime = data.filter(anime => 
   anime.isFavorite ||
   anime.isWatched ||
   (anime.userRating && anime.userRating !== '0.0')
 );
 
-  // Рахуємо кількість взаємодій та улюблених
+/** @type {number} totalInteracted - Загальна кількість взаємодій користувача з тайтлами */
   const totalInteracted = interactedAnime.length;
+/** @type {number} favoritesCount - Кількість аніме в списку улюблених */
   const favoritesCount = data.filter(a => a.isFavorite).length;
-  const watchedCount = data.filter(a => a.isWatched).length; // Додаткова метрика
+/** @type {number} watchedCount - Кількість аніме, відмічених як переглянуті */
+  const watchedCount = data.filter(a => a.isWatched).length;
 
 
-  // Порівняння середньої оцінки користувача та системи для аніме, які оцінив користувач
-  // Відбираємо ті аніме, які оцінив користувач
+/** * @type {Array} ratedAnime - Список аніме, яким користувач виставив власну оцінку.
+   */
   const ratedAnime = data.filter(a => a.userRating && a.userRating !== '0.0');
 
-  // Ваша середня оцінка для цих аніме
+/** * @type {string} avgUserRating - Середня оцінка користувача (округлена до 1 знака).
+   */
   const avgUserRating = ratedAnime.length > 0 
     ? (ratedAnime.reduce((sum, a) => sum + parseFloat(a.userRating), 0) / ratedAnime.length).toFixed(1) 
     : '0.0';
 
-  // Середня оцінка системи для ТИХ ЖЕ САМИХ аніме
+/** * @type {string} avgGlobalRating - Середня глобальна оцінка системи для тих самих тайтлів, 
+   * які оцінив користувач.
+   */
   const avgGlobalRating = ratedAnime.length > 0
     ? (ratedAnime.reduce((sum, a) => sum + parseFloat(a.rating), 0) / ratedAnime.length).toFixed(1)
     : '0.0';
 
-  // Статистика для улюблених аніме
+/** * @type {Object} favStats - Об'єкт розширеної статистики для вкладки "Улюблені".
+   * Містить кількість, середні оцінки, суму епізодів та часові межі.
+   */
   const favoriteItems = data.filter(a => a.isFavorite);
   const favoriteRated = favoriteItems.filter(a => a.userRating && a.userRating !== '0.0');
   
@@ -66,7 +88,11 @@ const interactedAnime = data.filter(anime =>
     oldest: watchedItems.length > 0 ? Math.min(...watchedItems.map(a => parseInt(a.year))) : '-'
   };
 
-  // Функція для пошуку найстарішого та найновішого року випуску
+/**
+   * Обчислює граничні роки випуску для переданого списку.
+   * @param {Array} items - Масив об'єктів аніме.
+   * @returns {Object} Об'єкт з полями oldest та newest.
+   */
   const getYearLimits = (items) => {
     if (items.length === 0) return { oldest: '-', newest: '-' };
     
