@@ -1,11 +1,38 @@
 import React, { useState} from 'react';
 
+/**
+ * Компонент картки окремого аніме.
+ * Відображає детальну інформацію про тайтл, дозволяє змінювати статуси
+ * (улюблене, переглянуто), видаляти додані користувачем записи та редагувати персональну оцінку.
+ * * @component
+ * @param {Object} props - Властивості компонента.
+ * @param {number} props.id - Унікальний ідентифікатор аніме.
+ * @param {string} props.title - Назва аніме.
+ * @param {string} props.poster - URL зображення постера.
+ * @param {number|string} props.rating - Загальний рейтинг аніме.
+ * @param {number|string} props.userRating - Персональна оцінка користувача.
+ * @param {string} props.description - Короткий опис сюжету.
+ * @param {string} props.year - Рік випуску.
+ * @param {string|number} props.episodes - Кількість епізодів.
+ * @param {string} props.studio - Студія виробництва.
+ * @param {string} props.genres - Жанри аніме.
+ * @param {boolean} props.isFavorite - Чи додано аніме в улюблені.
+ * @param {boolean} props.isWatched - Чи позначено аніме як переглянуте.
+ * @param {Function} props.onToggleFavorite - Функція для зміни статусу "улюблене".
+ * @param {Function} props.onToggleWatched - Функція для зміни статусу "переглянуто".
+ * @param {boolean} props.isAddedByUser - Чи було аніме додане користувачем вручну.
+ * @param {Function} props.onDeleteAnime - Функція для видалення аніме.
+ * @param {Function} props.onUpdateRating - Функція для оновлення персональної оцінки.
+ */
 const AnimeCard = ({ 
   id, title, poster, rating, userRating, description, year, episodes, 
   studio, genres, isFavorite, isWatched, onToggleFavorite, 
   onToggleWatched, isAddedByUser, onDeleteAnime, onUpdateRating 
 }) => {
   
+  /** * Форматований рейтинг для відображення (завжди один знак після коми).
+   * @type {string} 
+   */
   const displayUserRating = userRating ? parseFloat(userRating).toFixed(1) : '0.0';
   
   const [isEditing, setIsEditing] = useState(false);
@@ -18,6 +45,13 @@ if (displayUserRating !== prevRating) {
   setTempRating(displayUserRating);
 }
 
+/**
+   * Обробник збереження нової оцінки.
+   * Валідує введене число (0-10) та викликає функцію оновлення.
+   * @function handleSave
+   * @memberof AnimeCard
+   * @inner
+   */
   const handleSave = () => {
     const numRating = parseFloat(tempRating);
     if (isNaN(numRating) || numRating < 0 || numRating > 10) {

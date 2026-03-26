@@ -44,3 +44,14 @@ env/
 db.sqlite3
 /media/
 /staticfiles/
+
+docs/frontend_html/
+docs/build/
+docs/source/
+backend/docs/backend_html/
+.pdoc_cache/
+backend/.pdoc_cache/
+.ruff_cache/
+backend/.ruff_cache/
+dist/
+backend/dist/

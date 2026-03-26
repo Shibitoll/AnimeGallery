@@ -1,7 +1,28 @@
 import React from 'react';
 
+/**
+ * Компонент верхньої панелі (Header) застосунку.
+ * * Містить логотип та систему навігації по вкладках. Відображає динамічні лічильники
+ * для категорій "Улюблені" та "Переглянуті", а також керує станом активної вкладки.
+ * * @component
+ * @param {Object} props - Властивості компонента.
+ * @param {number} props.favoriteCount - Кількість аніме, доданих в обране.
+ * @param {number} props.watchedCount - Кількість переглянутих аніме.
+ * @param {string} props.currentTab - Назва поточної активної вкладки ('home', 'popular', 'favorite', 'watched', 'my-anime').
+ * @param {Function} props.setCurrentTab - Функція для зміни активної вкладки в головному стані App.
+ */
 const Header = ({ favoriteCount, watchedCount, currentTab, setCurrentTab }) => {
     
+    /**
+     * Обробник кліку по посиланнях навігації.
+     * Запобігає стандартній поведінці браузера (перезавантаженню сторінки) 
+     * та перемикає вкладку.
+     * * @function handleNavClick
+     * @memberof Header
+     * @inner
+     * @param {React.MouseEvent} e - Подія кліку миші.
+     * @param {string} tabName - Назва вкладки, на яку здійснюється перехід.
+     */
     const handleNavClick = (e, tabName) => {
         e.preventDefault();
         setCurrentTab(tabName);

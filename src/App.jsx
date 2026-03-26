@@ -17,8 +17,13 @@ function App() {
   const API_URL = 'http://127.0.0.1:8000/api/animes/';
 
 /**
-   * Завантажує список аніме з бекенду при першому рендері.
+   * Завантажує список аніме з бекенду при першому рендері компонента.
+   * Використовує асинхронну функцію всередині useEffect.
+   * @function fetchAnime
+   * @memberof App
+   * @inner
    * @async
+   * @returns {void}
    */
   useEffect(() => {
     const fetchAnime = async () => {
@@ -37,7 +42,10 @@ function App() {
   }, []);
 
 /**
-   * Оновлює статус "Улюблене" для конкретного аніме.
+   * Оновлює статус "Улюблене" для конкретного аніме через PATCH-запит.
+   * @function toggleFavorite
+   * @memberof App
+   * @inner
    * @async
    * @param {number} id - Унікальний ідентифікатор аніме.
    */
@@ -60,7 +68,10 @@ function App() {
 
 /**
    * Оновлює статус "Переглянуто" для конкретного аніме через PATCH-запит.
-   * * @async
+   * @function toggleWatched
+   * @memberof App
+   * @inner
+   * @async
    * @param {number} id - Унікальний ідентифікатор аніме.
    */
   const toggleWatched = async (id) => {
@@ -81,9 +92,12 @@ function App() {
   };
 
 /**
-   * Додає новий запис аніме до бази даних.
+   * Додає новий запис аніме до бази даних через POST-запит.
+   * @function addAnime
+   * @memberof App
+   * @inner
    * @async
-   * @param {Object} newAnime - Об'єкт з даними нового аніме.
+   * @param {Object} newAnime - Об'єкт з даними нового аніме (title, genres, rating тощо).
    */
 const addAnime = async (newAnime) => {
   try {
@@ -106,7 +120,10 @@ const addAnime = async (newAnime) => {
 };
 
 /**
-   * Видаляє аніме з бази даних після підтвердження.
+   * Видаляє аніме з бази даних через DELETE-запит після підтвердження користувачем.
+   * @function deleteAnime
+   * @memberof App
+   * @inner
    * @async
    * @param {number} id - Ідентифікатор аніме для видалення.
    */
@@ -134,9 +151,12 @@ const deleteAnime = async (id) => {
 
 /**
    * Оновлює персональну оцінку аніме через PATCH-запит.
-   * * @async
+   * @function updateRating
+   * @memberof App
+   * @inner
+   * @async
    * @param {number} id - Ідентифікатор аніме.
-   * @param {number|string} newRating - Нове значення рейтингу (наприклад, 8.5).
+   * @param {number|string} newRating - Нове значення рейтингу (від 0 до 10).
    */
   const updateRating = async (id, newRating) => {
     try {

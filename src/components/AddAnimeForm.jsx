@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import '../styles/AddAnimeForm.css'; 
 
+/**
+ * Компонент форми для додавання нового аніме до персонального каталогу.
+ * * Дозволяє користувачеві ввести назву, опис, постер та інші характеристики тайтла.
+ * Якщо постер не вказано, генерує автоматичне зображення-заглушку.
+ * * @component
+ * @param {Object} props - Властивості компонента.
+ * @param {Function} props.onAddAnime - Функція зворотного виклику, яка приймає об'єкт нового аніме та додає його до загального списку.
+ */
 const AddAnimeForm = ({ onAddAnime }) => {
   const [title, setTitle] = useState('');
   const [poster, setPoster] = useState('');
@@ -12,6 +20,15 @@ const AddAnimeForm = ({ onAddAnime }) => {
   const [rating, setRating] = useState('');
   const [status, setStatus] = useState('plan'); 
 
+  /**
+   * Обробник події відправки форми.
+   * Валідує назву, формує об'єкт нового аніме з дефолтними значеннями та очищає форму.
+   * * @function handleSubmit
+   * @memberof AddAnimeForm
+   * @inner
+   * @param {React.FormEvent} e - Подія відправки форми.
+   * @returns {void}
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -23,7 +40,11 @@ const AddAnimeForm = ({ onAddAnime }) => {
     const defaultPosterText = "Твоя уява\nмалює краще\nза будь-який\nпостер!";
     const encodedText = encodeURIComponent(defaultPosterText);
     const generatedPoster = `https://placehold.co/300x420/e5e7eb/4b5563?text=${encodedText}&font=Montserrat`;
-
+    
+    /**
+     * Об'єкт нового аніме, що готується до відправки.
+     * @type {Object}
+     */
     const newAnime = {
       title: title.trim(),
       poster: poster.trim() || generatedPoster,

@@ -3,17 +3,20 @@ import AnimeList from './AnimeList';
 import AddAnimeForm from './AddAnimeForm';
 
 /**
- * Компонент Main відповідає за відображення контенту залежно від обраної вкладки.
- * Розраховує статистику користувача та фільтрує списки аніме.
+ * Головний контентний компонент (Main).
+ * * Відповідає за:
+ * 1. Розрахунок глобальної та категоріальної статистики (середні рейтинги, лічильники епізодів).
+ * 2. Фільтрацію загального масиву даних за вкладками (Home, Popular, Favorite, Watched, My Anime).
+ * 3. Рендеринг відповідних секцій та списків аніме.
  * * @component
  * @param {Object} props - Властивості компонента.
- * @param {Array} props.data - Повний список аніме з бази даних.
- * @param {Function} props.toggleFavorite - Функція перемикання статусу "улюблене".
- * @param {Function} props.toggleWatched - Функція перемикання статусу "переглянуто".
- * @param {string} props.currentTab - Ідентифікатор активної вкладки (home, popular, favorite, watched, my-anime).
- * @param {Function} props.onAddAnime - Функція додавання нового аніме.
- * @param {Function} props.onDeleteAnime - Функція видалення аніме.
- * @param {Function} props.onUpdateRating - Функція оновлення користувацької оцінки.
+ * @param {Array<Object>} props.data - Повний масив об'єктів аніме з бази даних.
+ * @param {Function} props.toggleFavorite - Обробник зміни статусу "улюблене".
+ * @param {Function} props.toggleWatched - Обробник зміни статусу "переглянуто".
+ * @param {string} props.currentTab - ID активної вкладки для перемикання контенту.
+ * @param {Function} props.onAddAnime - Функція для створення нового запису аніме.
+ * @param {Function} props.onDeleteAnime - Функція для видалення запису.
+ * @param {Function} props.onUpdateRating - Функція для оновлення оцінки користувача.
  */
 const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDeleteAnime, onUpdateRating }) => {
   
@@ -26,8 +29,8 @@ if (!data || data.length === 0) {
     );
   }
   
-/** * @type {Array} interactedAnime - Фільтрує аніме, з якими користувач мав будь-яку взаємодію 
-   * (додав у вибране, позначив як переглянуте або поставив оцінку).
+/** * @type {Array<Object>} interactedAnime - Аніме, з якими користувач взаємодіяв 
+   * (лайкнув, подивився або оцінив).
    */
 const interactedAnime = data.filter(anime => 
   anime.isFavorite ||
@@ -60,9 +63,17 @@ const interactedAnime = data.filter(anime =>
     ? (ratedAnime.reduce((sum, a) => sum + parseFloat(a.rating), 0) / ratedAnime.length).toFixed(1)
     : '0.0';
 
-/** * @type {Object} favStats - Об'єкт розширеної статистики для вкладки "Улюблені".
-   * Містить кількість, середні оцінки, суму епізодів та часові межі.
+/** * Об'єкт статистики для вкладки "Улюблені".
+   * @typedef {Object} StatsObj
+   * @property {number} count - Кількість елементів.
+   * @property {string} userAvg - Середня оцінка користувача.
+   * @property {string} globalAvg - Середня оцінка системи.
+   * @property {number} totalEpisodes - Сума епізодів усіх тайтлів секції.
+   * @property {number|string} newest - Рік випуску найновішого тайтла.
+   * @property {number|string} oldest - Рік випуску найстарішого тайтла.
    */
+
+/** @type {StatsObj} favStats - Статистика для обраних аніме. */
   const favoriteItems = data.filter(a => a.isFavorite);
   const favoriteRated = favoriteItems.filter(a => a.userRating && a.userRating !== '0.0');
   
@@ -75,7 +86,7 @@ const interactedAnime = data.filter(anime =>
     oldest: favoriteItems.length > 0 ? Math.min(...favoriteItems.map(a => parseInt(a.year))) : '-'
   };
 
-  // Статистика для переглянутих аніме
+  /** @type {StatsObj} watchedStats - Статистика для переглянутих аніме. */
   const watchedItems = data.filter(a => a.isWatched);
   const watchedRated = watchedItems.filter(a => a.userRating && a.userRating !== '0.0');
 
@@ -89,9 +100,12 @@ const interactedAnime = data.filter(anime =>
   };
 
 /**
-   * Обчислює граничні роки випуску для переданого списку.
-   * @param {Array} items - Масив об'єктів аніме.
-   * @returns {Object} Об'єкт з полями oldest та newest.
+   * Допоміжна функція для визначення діапазону років випуску.
+   * * @function getYearLimits
+   * @memberof Main
+   * @inner
+   * @param {Array<Object>} items - Масив аніме для аналізу.
+   * @returns {{oldest: (number|string), newest: (number|string)}} Об'єкт з межами років.
    */
   const getYearLimits = (items) => {
     if (items.length === 0) return { oldest: '-', newest: '-' };

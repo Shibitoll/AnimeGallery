@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+"""Path: Абсолютний шлях до кореневої директорії проєкту."""
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'user_api',
     'anime_api',
 ]
+"""list: Перелік усіх активованих додатків (вбудованих, сторонніх та власних)."""
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+"""list: Ланцюжок проміжних шарів (middleware) для обробки запитів та відповідей."""
 
 ROOT_URLCONF = 'anime_backend.urls'
 
@@ -77,6 +79,7 @@ TEMPLATES = [
         },
     },
 ]
+"""list: Конфігурація рушіїв шаблонів Django."""
 
 WSGI_APPLICATION = 'anime_backend.wsgi.application'
 
