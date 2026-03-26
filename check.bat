@@ -1,40 +1,59 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Налаштування кольорів (6 - жовтий, 2 - зелений, 4 - червоний)
-title AnimeGallery - Комплексна перевірка проєкту
+:: Set window title
+title AnimeGallery - Full Project Verification
 
 echo ============================================================
-echo           ЗАПУСК КОМПЛЕКСНОЇ ПЕРЕВІРКИ ПРОЄКТУ
+echo           STARTING PROJECT COMPREHENSIVE CHECK
 echo ============================================================
 
-:: --- КРОК 1: БЕКЕНД ---
-echo [1/4] Перевірка стилю та логіки Python (Ruff)...
+:: --- STEP 1: BACKEND (Ruff) ---
+echo [1/4] Running Python Linting (Ruff)...
 cd backend
 call ruff check . --fix
-if %ERRORLEVEL% NEQ 0 (set "STAGE=Ruff (Backend)"; goto error)
+if %ERRORLEVEL% NEQ 0 (
+    set "STAGE=Ruff (Backend)"
+    cd ..
+    goto error
+)
 
-echo [2/4] Статична типізація Python (Mypy)...
+:: --- STEP 2: BACKEND (Mypy) ---
+echo [2/4] Running Static Type Check (Mypy)...
+:: Entering the subfolder where manage.py and project code live
+cd anime_backend
+set PYTHONPATH=%PYTHONPATH%;%CD%
 call mypy .
-if %ERRORLEVEL% NEQ 0 (set "STAGE=Mypy (Backend)"; goto error)
-cd ..
+if %ERRORLEVEL% NEQ 0 (
+    set "STAGE=Mypy (Backend)"
+    cd ..\..
+    goto error
+)
+:: Return to root (out of anime_backend and backend)
+cd ..\..
 
-:: --- КРОК 2: ФРОНТЕНД ---
-echo [3/4] Аналіз коду React (ESLint)...
-cd frontend
+:: --- STEP 3: FRONTEND (ESLint) ---
+echo [3/4] Running React Linting (ESLint)...
+:: We are already in root, where package.json and eslint.config.js are
 call npm run lint
-if %ERRORLEVEL% NEQ 0 (set "STAGE=ESLint (Frontend)"; goto error)
+if %ERRORLEVEL% NEQ 0 (
+    set "STAGE=ESLint (Frontend)"
+    goto error
+)
 
-echo [4/4] Тестова збірка та типізація (Vite/Build)...
+:: --- STEP 4: FRONTEND (Build) ---
+echo [4/4] Running Test Build (Vite/TS)...
 call npm run build
-if %ERRORLEVEL% NEQ 0 (set "STAGE=Build/TS (Frontend)"; goto error)
-cd ..
+if %ERRORLEVEL% NEQ 0 (
+    set "STAGE=Build/TS (Frontend)"
+    goto error
+)
 
-:: --- УСПІХ ---
+:: --- SUCCESS ---
 echo.
 echo ============================================================
-echo [УСПІХ] Усі етапи перевірки пройдено успішно!
-echo Можна безпечно робити commit та push.
+echo [SUCCESS] All verification stages passed!
+echo You can safely COMMIT and PUSH your changes.
 echo ============================================================
 pause
 exit /b 0
@@ -42,9 +61,8 @@ exit /b 0
 :error
 echo.
 echo ============================================================
-echo [ПОМИЛКА] Етап: !STAGE! завершився невдало.
-echo Будь ласка, виправте зауваження лінтера вище.
+echo [FAILED] Stage: !STAGE! failed.
+echo Please fix the issues reported above.
 echo ============================================================
-if exist ..\package.json (cd ..)
 pause
 exit /b 1

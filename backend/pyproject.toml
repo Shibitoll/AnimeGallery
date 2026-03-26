@@ -1,30 +1,35 @@
 [tool.ruff]
-# Загальні налаштування мають бути тут
-line-length = 150
+line-length = 120
 target-version = "py312"
 
-# Ігноруємо специфічні директорії
+# Об'єднаний список виключень
 exclude = [
     ".git",
     "__pycache__",
     "env",
     "venv",
     "migrations",
+    "**/migrations/*",
+    "manage.py",
 ]
 
 [tool.ruff.lint]
-# Базові правила перевірки (linter): E (стиль pycodestyle), F (логічні помилки Pyflakes), I (сортування імпортів)
+# Вмикаємо перевірки: E (стиль), F (логіка), I (сортування)
 select = ["E", "F", "I"]
 ignore = []
 
+# Додаємо правило для змінних з підкресленням з вашого ruff.toml
+dummy-variable-rgx = "^_$"
+
 [tool.ruff.lint.per-file-ignores]
-# Ігноруємо невикористані імпорти в __init__.py файлах
+# Специфічне правило для ініціалізації пакетів
 "__init__.py" = ["F401"]
 
 [tool.mypy]
+# Налаштування типізації для Django
 plugins = ["mypy_django_plugin.main"]
 ignore_missing_imports = true
 exclude = ["migrations", "venv", "env"]
 
 [tool.django-stubs]
-django_settings_module = "backend.settings"
+django_settings_module = "anime_backend.settings"

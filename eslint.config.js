@@ -6,7 +6,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
   // 1. Ігнорування файлів та директорій, які не повинні перевірятися
-  globalIgnores(['dist', 'node_modules', 'landing', 'backend', 'eslint.config.js']),
+  globalIgnores(['dist', 'node_modules', 'landing', 'backend', 'eslint.config.js', 'docs', 'scripts']),
   
   {
     files: ['**/*.{js,jsx}'],
