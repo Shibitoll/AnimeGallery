@@ -1,0 +1,1 @@
+web: cd backend/anime_backend && gunicorn --workers 3 --bind 0.0.0.0:8000 anime_backend.wsgi:application
