@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     
     'user_api',
     'anime_api',
+    'drf_spectacular',
 ]
 """list: Перелік усіх активованих додатків (вбудованих, сторонніх та власних)."""
 
@@ -139,7 +140,32 @@ CORS_ALLOWED_ORIGINS = [
 # Налаштування Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # Для пагінації (поділ на сторінки):
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 20,
+}
+
+# Налаштування для автогенерації OpenAPI документації (Swagger)
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'AnimeGallery API',
+    'DESCRIPTION': 'Інтерактивна документація для API каталогу аніме. Дозволяє тестувати ендпоінти прямо з браузера.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # Цей блок додає підтримку JWT у вікно Swagger
+    'COMPONENT_SPLIT_PATCH': True,
+    'COMPONENT_SPLIT_COMMAND': True,
+    'SECURITY': [{
+        'jwtAuth': [],
+    }],
+    'APPEND_COMPONENTS': {
+        "securitySchemes": {
+            "jwtAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            }
+        }
+    },
+
 }

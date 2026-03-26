@@ -7,12 +7,16 @@
 """
 from django.contrib import admin
 from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from user_api.views import RegisterView  # Імпортуємо наше представлення
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('anime_api.urls')),
     path('api/register/', RegisterView.as_view(), name='auth_register'),
+
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'), # Генерація файлу OpenAPI
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'), # Інтерактивний інтерфейс
 ]
 """
 list: Загальний список маршрутів (URL-адрес) проєкту.
@@ -21,4 +25,6 @@ list: Загальний список маршрутів (URL-адрес) про
 - `/admin/` — Панель адміністратора (керування БД).
 - `/api/` — Базовий шлях для всіх ендпоінтів `anime_api` (наприклад, `/api/animes/`).
 - `/api/register/` — Ендпоінт для створення нового облікового запису користувача.
+- `/api/schema/` — Ендпоінт для завантаження сирої OpenAPI 3.0 специфікації (YAML/JSON).
+- `/api/docs/` — Інтерактивна документація Swagger UI для тестування API.
 """
