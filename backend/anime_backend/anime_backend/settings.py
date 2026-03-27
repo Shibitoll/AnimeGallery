@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'anime_api.middleware.GlobalExceptionLoggingMiddleware',
 ]
 """list: Ланцюжок проміжних шарів (middleware) для обробки запитів та відповідей."""
 
@@ -144,6 +145,49 @@ REST_FRAMEWORK = {
     # Для пагінації (поділ на сторінки):
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 20,
+}
+
+# Логи будуть зберігатися прямо в корені папки backend/anime_backend
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '{asctime} [{levelname}] {module}: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'anime_gallery.log', # Прямий шлях
+            'formatter': 'standard',
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'errors.log', # Прямий шлях
+            'formatter': 'standard',
+        },
+    },
+    'loggers': {
+        'anime_api': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['error_file', 'console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
 }
 
 # Налаштування для автогенерації OpenAPI документації (Swagger)

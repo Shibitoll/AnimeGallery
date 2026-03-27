@@ -4,9 +4,12 @@
 Містить визначення структури таблиць для зберігання інформації про аніме 
 та їхнього зв'язку із користувачами (користувацькі списки, оцінки тощо).
 """
+import logging
+
 from django.contrib.auth.models import User
 from django.db import models
 
+logger = logging.getLogger('anime_api')
 
 class Anime(models.Model):
     """
@@ -37,7 +40,7 @@ class Anime(models.Model):
     """str: Анімаційна студія, що створила тайтл."""
     status = models.CharField(max_length=100, blank=True, null=True, verbose_name="Статус")
     """str, optional: Статус виходу (наприклад, 'Виходить', 'Завершено')."""
-    
+
     # Рейтинги (Загальний та Користувацький)
     rating = models.DecimalField(
         max_digits=3, 
@@ -95,3 +98,46 @@ class Anime(models.Model):
         verbose_name = "Аніме"
         verbose_name_plural = "Аніме"
         ordering = ['-rating']
+    def save(self, *args, **kwargs):
+        """
+        Зберігає об'єкт моделі Anime в базу даних із вбудованим логуванням.
+        
+        Перевіряє наявність логічних аномалій перед збереженням.
+        У разі успіху записує подію (INFO), а в разі помилки бази
+        даних генерує критичний лог (CRITICAL) із збереженням трейсбеку.
+        
+        Args:
+            *args: Додаткові позиційні аргументи для батьківського методу save.
+            **kwargs: Додаткові іменовані аргументи для батьківського методу save.
+            
+        Raises:
+            Exception: Перехоплює та прокидає далі будь-яку помилку бази даних,
+                       забезпечуючи її фіксацію в логах.
+        """
+        # Логічна аномалія (WARNING): Аніме переглянуто, але немає власника
+        if self.in_watchlist and not self.owner:
+            logger.warning(
+                f"Логічна аномалія: Аніме '{self.title}' позначено як 'Переглянуто', "
+                f"але не має прив'язки до користувача (owner=None)."
+            )
+            
+        # Логічна аномалія (WARNING): Оцінка виходить за межі 10-бальної шкали
+        if self.user_rating < 0.0 or self.user_rating > 10.0:
+            logger.warning(
+                f"Логічна аномалія: Оцінка для '{self.title}' виходить за межі "
+                f"(поточна: {self.user_rating})."
+            )
+
+        try:
+            # Виклик оригінального методу збереження Django
+            super().save(*args, **kwargs)
+            # Логування успішного збереження (INFO)
+            logger.info(f"Запис успішно збережено в БД: Аніме '{self.title}' (ID: {self.id})")
+            
+        except Exception as e:
+            # Помилка бази даних (CRITICAL) з повним стеком викликів
+            logger.critical(
+                f"Критична помилка при збереженні аніме '{self.title}' в БД: {str(e)}", 
+                exc_info=True
+            )
+            raise e

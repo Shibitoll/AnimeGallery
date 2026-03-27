@@ -1,18 +1,12 @@
-"""
-Модуль конфігурації додатка (App) для роботи з аніме.
+import logging
 
-Цей файл містить налаштування для додатка `anime_api`, 
-які вказують Django, як саме його ініціалізувати в загальній системі.
-"""
 from django.apps import AppConfig
 
+logger = logging.getLogger('anime_api')
 
 class AnimeApiConfig(AppConfig):
-    """
-    Клас конфігурації додатка anime_api.
-    
-    Використовується Django для підключення додатка, його моделей, 
-    маршрутів та специфічних налаштувань до основного проєкту.
-    """
+    default_auto_field = 'django.db.models.BigAutoField'
     name = 'anime_api'
-    """str: Повна системна назва додатка в межах проєкту."""
+
+    def ready(self):
+        logger.info("Сервіс Anime API успішно запущено.")
