@@ -166,15 +166,22 @@ LOGGING = {
         },
         'file': {
             'level': GLOBAL_LOG_LEVEL,
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'anime_gallery.log', # Прямий шлях
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'anime_gallery.log',
+            'maxBytes': 5242880,
+            'backupCount': 3,
             'formatter': 'standard',
+            'encoding': 'utf-8',
         },
         'error_file': {
             'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'errors.log', # Прямий шлях
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': BASE_DIR / 'errors.log',
+            'when': 'midnight',
+            'interval': 1,
+            'backupCount': 7,
             'formatter': 'standard',
+            'encoding': 'utf-8',
         },
     },
     'loggers': {
