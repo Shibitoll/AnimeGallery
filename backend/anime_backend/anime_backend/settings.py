@@ -147,6 +147,7 @@ REST_FRAMEWORK = {
     # 'PAGE_SIZE': 20,
 }
 
+GLOBAL_LOG_LEVEL = os.environ.get('DJANGO_LOG_LEVEL', 'INFO').upper()
 # Логи будуть зберігатися прямо в корені папки backend/anime_backend
 LOGGING = {
     'version': 1,
@@ -159,12 +160,12 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': GLOBAL_LOG_LEVEL,
             'class': 'logging.StreamHandler',
             'formatter': 'standard',
         },
         'file': {
-            'level': 'INFO',
+            'level': GLOBAL_LOG_LEVEL,
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'anime_gallery.log', # Прямий шлях
             'formatter': 'standard',
@@ -179,7 +180,7 @@ LOGGING = {
     'loggers': {
         'anime_api': {
             'handlers': ['console', 'file', 'error_file'],
-            'level': 'DEBUG',
+            'level': GLOBAL_LOG_LEVEL,
             'propagate': True,
         },
         'django.request': {
