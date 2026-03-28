@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'user_api',
     'anime_api',
     'drf_spectacular',
+    'debug_toolbar',
 ]
 """list: Перелік усіх активованих додатків (вбудованих, сторонніх та власних)."""
 
@@ -62,8 +63,14 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'anime_api.middleware.GlobalExceptionLoggingMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 """list: Ланцюжок проміжних шарів (middleware) для обробки запитів та відповідей."""
+
+# Налаштування для Django Debug Toolbar
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 ROOT_URLCONF = 'anime_backend.urls'
 
@@ -219,5 +226,6 @@ SPECTACULAR_SETTINGS = {
             }
         }
     },
+    
 
 }

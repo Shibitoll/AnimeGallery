@@ -8,6 +8,7 @@
 import logging
 
 from django_filters.rest_framework import DjangoFilterBackend
+from pyinstrument import Profiler
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -91,4 +92,27 @@ class AnimeViewSet(viewsets.ModelViewSet):
         response = super().destroy(request, *args, **kwargs)
         
         logger.info(f"Аніме '{anime_title}' було остаточно видалено з бази даних.")
+        return response
+    
+def list(self, request, *args, **kwargs):
+        """
+        Перевизначений метод отримання списку (Логування + Профілювання).
+        """
+        # Логування з Лабораторної 7
+        logger.debug(f"Запит на отримання списку аніме. Параметри: {request.query_params}")
+        
+        # Запуск профілювальника з Лабораторної 8
+        profiler = Profiler(interval=0.001)
+        profiler.start()
+        
+        # Основна логіка віддачі списку
+        response = super().list(request, *args, **kwargs)
+        
+        # Зупинка профілювальника та вивід у консоль
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True))
+        
+        # Логування успішного результату
+        logger.info(f"Успішно віддано список з {len(response.data)} аніме.")
+        
         return response

@@ -5,10 +5,11 @@
 Він розподіляє вхідні адреси (URL) між панеллю адміністратора, додатком 
 для роботи з каталогом аніме (`anime_api`) та функціями користувачів (`user_api`).
 """
+from django.conf import settings  # Імпортуємо наше представлення
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from user_api.views import RegisterView  # Імпортуємо наше представлення
+from user_api.views import RegisterView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,3 +29,9 @@ list: Загальний список маршрутів (URL-адрес) про
 - `/api/schema/` — Ендпоінт для завантаження сирої OpenAPI 3.0 специфікації (YAML/JSON).
 - `/api/docs/` — Інтерактивна документація Swagger UI для тестування API.
 """
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
