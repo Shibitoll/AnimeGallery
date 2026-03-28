@@ -31,7 +31,8 @@ function App() {
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error('Помилка мережі');
         const data = await response.json();
-        setAnimeList(data);
+        const actualAnimeArray = data.results ? data.results : data;
+        setAnimeList(actualAnimeArray);
       } catch (error) {
         console.error("Не вдалося завантажити аніме:", error);
       } finally {

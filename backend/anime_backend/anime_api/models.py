@@ -22,33 +22,42 @@ class Anime(models.Model):
     - персональні статуси користувача
     """
     
-    title = models.CharField(max_length=255, verbose_name="Назва")
+    # ДОДАНО db_index=True для швидкого пошуку за назвою
+    title = models.CharField(max_length=255, verbose_name="Назва", db_index=True)
     """str: Офіційна назва аніме."""
+    
     description = models.TextField(verbose_name="Опис")
     """str: Детальний опис сюжету."""
+    
     poster = models.URLField(max_length=500, verbose_name="URL постера")
     """str: Посилання на зображення обкладинки/постера."""
     
-    # Характеристики (згідно з вашою моделлю даних у React)
-    genres = models.CharField(max_length=255, verbose_name="Жанри")
+    # ДОДАНО db_index=True для швидкого пошуку за жанрами
+    genres = models.CharField(max_length=255, verbose_name="Жанри", db_index=True)
     """str: Список жанрів, розділених комою."""
+    
     year = models.CharField(max_length=4, verbose_name="Рік випуску")
     """str: Рік виходу аніме на екрани."""
+    
     episodes = models.CharField(max_length=50, verbose_name="Кількість епізодів")
     """str: Загальна кількість серій."""
+    
     studio = models.CharField(max_length=255, verbose_name="Студія")
     """str: Анімаційна студія, що створила тайтл."""
+    
     status = models.CharField(max_length=100, blank=True, null=True, verbose_name="Статус")
     """str, optional: Статус виходу (наприклад, 'Виходить', 'Завершено')."""
 
-    # Рейтинги (Загальний та Користувацький)
+    # ДОДАНО db_index=True для швидкого сортування (ORDER BY rating DESC)
     rating = models.DecimalField(
         max_digits=3, 
         decimal_places=1, 
         default=0.0, 
-        verbose_name="Загальний рейтинг"
+        verbose_name="Загальний рейтинг",
+        db_index=True
     )
     """float: Середня оцінка аніме на ресурсі (від 0.0 до 10.0)."""
+    
     user_rating = models.DecimalField(
         max_digits=3, 
         decimal_places=1, 
@@ -60,11 +69,11 @@ class Anime(models.Model):
     # Статуси (ER-діаграма: стани аніме для конкретного юзера)
     is_favorite = models.BooleanField(default=False, verbose_name="В улюблених")
     """bool: Прапорець, що вказує, чи додав користувач аніме до списку улюблених."""
+    
     in_watchlist = models.BooleanField(default=False, verbose_name="Переглянуто")
     """bool: Прапорець, що вказує, чи додав користувач аніме до списку переглянутих."""
     
     # Зв'язок з користувачем (ER: User <-> Anime)
-    # Поле owner пов'язує аніме з конкретним зареєстрованим користувачем
     owner = models.ForeignKey(
         User, 
         on_delete=models.CASCADE, 
@@ -74,6 +83,7 @@ class Anime(models.Model):
         verbose_name="Власник"
     )
     """User, optional: Зовнішній ключ, що пов'язує запис із конкретним користувачем (ER-зв'язок)."""
+    
     is_added_by_user = models.BooleanField(
         default=False, 
         verbose_name="Додано користувачем самостійно"
@@ -98,21 +108,10 @@ class Anime(models.Model):
         verbose_name = "Аніме"
         verbose_name_plural = "Аніме"
         ordering = ['-rating']
+
     def save(self, *args, **kwargs):
         """
         Зберігає об'єкт моделі Anime в базу даних із вбудованим логуванням.
-        
-        Перевіряє наявність логічних аномалій перед збереженням.
-        У разі успіху записує подію (INFO), а в разі помилки бази
-        даних генерує критичний лог (CRITICAL) із збереженням трейсбеку.
-        
-        Args:
-            *args: Додаткові позиційні аргументи для батьківського методу save.
-            **kwargs: Додаткові іменовані аргументи для батьківського методу save.
-            
-        Raises:
-            Exception: Перехоплює та прокидає далі будь-яку помилку бази даних,
-                       забезпечуючи її фіксацію в логах.
         """
         # Логічна аномалія (WARNING): Аніме переглянуто, але немає власника
         if self.in_watchlist and not self.owner:
