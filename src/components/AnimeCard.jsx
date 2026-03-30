@@ -1,4 +1,5 @@
 import React, { useState} from 'react';
+import { Link } from 'react-router-dom';
 
 /**
  * Компонент картки окремого аніме.
@@ -135,7 +136,11 @@ if (displayUserRating !== prevRating) {
           >
             {isEditing ? '💾 Зберегти' : '✎ Змінити оцінку'}
           </button>
+          <Link to={`/anime/${id}`} className="details-link">
+            Детальніше →
+          </Link>
         </div>
+        
       </div>
     </article>
   );
