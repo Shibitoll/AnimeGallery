@@ -1,0 +1,89 @@
+import React, { useState, useEffect } from 'react';
+
+const TopAnimeList = () => {
+  const [topAnime, setTopAnime] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTopAnime = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // ендпоінт сезонних новинок
+        const response = await fetch('https://api.jikan.moe/v4/seasons/now');
+        
+        if (!response.ok) {
+          throw new Error(`Помилка сервера: ${response.status}`);
+        }
+        
+        const result = await response.json();
+
+        const recentAnime = result.data.slice(0, 10); // беремо перші 10 новинок
+
+        setTopAnime(recentAnime);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTopAnime();
+  }, []);
+
+  // 1. Стан завантаження (тепер зі спінером)
+  if (isLoading) {
+    return (
+      <div className="api-status-container">
+        <div className="loading-spinner"></div>
+        <div className="loading-text">Отримуємо свіжі новинки сезону...</div>
+      </div>
+    );
+  }
+
+  // 2. Стан помилки (оформлений у блок)
+  if (error) {
+    return (
+      <div className="api-status-container error-block">
+        <span className="error-icon">⚠️</span>
+        <div className="error-text">Не вдалося завантажити новинки: {error}</div>
+      </div>
+    );
+  }
+
+  // 3. Успішне відображення (Success)
+  return (
+    <section className="api-section">
+      <h2 className="gallery-title">Новинки цього сезону</h2>
+      <div className="anime-grid">
+        {topAnime.map((anime) => (
+          <article key={anime.mal_id} className="anime-card api-card">
+            <div className="poster-wrapper">
+              <img 
+                src={anime.images.jpg.image_url} 
+                alt={anime.title} 
+                className="card-image" 
+              />
+              {anime.score && <span className="rating-badge mal-rating">MAL ★ {anime.score}</span>}
+            </div>
+            <div className="card-content">
+              <h3 className="card-title">{anime.title_english || anime.title}</h3>
+              <p className="card-desc">
+                {anime.synopsis ? `${anime.synopsis.slice(0, 100)}...` : "Опис новинки з'явиться згодом"}
+              </p>
+              <div className="card-footer-info">
+                <span>{anime.year || new Date().getFullYear()}</span>
+                <span>{anime.type}</span>
+                <span>{anime.episodes || '?'} сер.</span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default TopAnimeList;

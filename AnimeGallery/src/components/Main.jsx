@@ -1,6 +1,7 @@
 import React from 'react';
 import AnimeList from './AnimeList';
 import AddAnimeForm from './AddAnimeForm';
+import TopAnimeList from './TopAnimeList';
 
 const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDeleteAnime, onUpdateRating }) => {
   
@@ -150,6 +151,8 @@ const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDe
           <h2 className="gallery-title"> Популярні <span className="title-badge">Рейтинг 8.5+</span></h2>
           <AnimeList list={popularAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating}/>
 
+          <TopAnimeList />
+          
           {/* Блок аніме користувача на головній (показуємо, якщо є додані користувачем) */}
           {myAnimeList.length > 0 && (
             <div className="category-section">

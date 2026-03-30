@@ -438,3 +438,87 @@ a {
   justify-content: center;
   border-radius: 10px;
 }
+
+/* Стилі для секції API */
+
+/* Контейнер для станів Loading та Error */
+.api-status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  background: #fdfdfd;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  margin: 40px auto;
+  max-width: 800px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+/* Спінер завантаження (CSS анімація) */
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db; /* Основний колір сайту */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.loading-text {
+  font-size: 1.2rem;
+  color: #666;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Оформлення блоку помилки */
+.api-status-container.error-block {
+  background: #fff5f5;
+  border: 1px solid #ffcdd2;
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.error-text {
+  font-size: 1.1rem;
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+/* Специфічні стилі для карток з API */
+.api-card {
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.api-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+  border-color: #3498db;
+}
+
+/* Колір бейджа для рейтингу MyAnimeList (Jikan) */
+.mal-rating {
+  background: #2e51a2 !important; 
+  color: white !important;
+}
+
+/* Розділювач */
+.section-divider {
+  margin: 50px auto;
+  width: 80%;
+  border: 0;
+  border-top: 2px dashed #ccc;
+}
