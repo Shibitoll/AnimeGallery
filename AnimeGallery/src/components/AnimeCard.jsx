@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ id, title, poster, rating, userRating, description, year, episodes, studio, genres, isFavorite, isWatched, onToggleFavorite, onToggleWatched, isAddedByUser, onDeleteAnime, onUpdateRating }) => {
   // Якщо userRating ще не встановлено, показуємо "0.0"
@@ -86,6 +87,9 @@ const AnimeCard = ({ id, title, poster, rating, userRating, description, year, e
           >
             {isEditing ? 'Зберегти зміни' : 'Бажаєте змінити?'}
           </button>
+          <Link to={`/anime/${id}`} className="details-link">
+            Детальніше →
+          </Link>
         </div>
 
       </div>

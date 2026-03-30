@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { animeList as initialAnimeList } from './data/data';
 import Header from './components/Header';
 import Main from './components/Main';
 import Footer from './components/Footer';
+import About from './pages/About';
+import AnimeDetails from './pages/AnimeDetails';
+import NotFound from './pages/NotFound';
 import './styles/App.css';
 
 function App() {
@@ -71,15 +75,41 @@ function App() {
         currentTab={currentTab} 
         setCurrentTab={setCurrentTab} 
       />
-      <Main 
-        data={animeList} 
-        toggleFavorite={toggleFavorite} 
-        toggleWatched={toggleWatched}
-        currentTab={currentTab}
-        onAddAnime={addAnime}
-        onDeleteAnime={deleteAnime}
-        onUpdateRating={updateRating}
-      />
+        <Routes>
+          <Route path="/" element={
+            <Main 
+              data={animeList} 
+              toggleFavorite={toggleFavorite} 
+              toggleWatched={toggleWatched}
+              currentTab={currentTab}
+              onAddAnime={addAnime}
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
+          } />
+
+          <Route path="/popular" element={
+            <Main data={animeList} currentTab="popular" onToggleFavorite={toggleFavorite} />
+          } />
+
+          <Route path="/favorite" element={
+            <Main data={animeList} currentTab="favorite" onToggleFavorite={toggleFavorite} />
+          } />
+
+          <Route path="/watched" element={
+            <Main data={animeList} currentTab="watched" onToggleFavorite={toggleFavorite} />
+          } />
+
+          <Route path="/my-anime" element={
+            <Main data={animeList} currentTab="my-anime" onToggleFavorite={toggleFavorite} />
+          } />
+
+          <Route path="/about" element={<About />} />
+
+          <Route path="/anime/:id" element={<AnimeDetails allAnime={animeList} />} />
+          
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       <Footer />
     </div>
   );

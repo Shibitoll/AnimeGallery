@@ -1,49 +1,58 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 
 const Header = ({ favoriteCount, watchedCount, currentTab, setCurrentTab }) => {
     
-    const handleNavClick = (e, tabName) => {
-        e.preventDefault();
+    const handleNavClick = (tabName) => {
         setCurrentTab(tabName);
     };
 
     return (
         <header className="main-header">
             <div className="header-content">
-                <div className="logo">
-                    AnimeGallery
-                </div>
+                <div className="logo">AnimeGallery</div>
                 <nav className="main-nav">
-                    <a href="#home" 
-                       className={`nav-link ${currentTab === 'home' ? 'active' : ''}`}
-                       onClick={(e) => handleNavClick(e, 'home')}>
-                        Головна
-                    </a>
-                    
-                    <a href="#popular" 
-                       className={`nav-link ${currentTab === 'popular' ? 'active' : ''}`}
-                       onClick={(e) => handleNavClick(e, 'popular')}>
-                        Популярні
-                    </a>
-                    
-                    <a href="#favorite" 
-                       className={`nav-link ${currentTab === 'favorite' ? 'active' : ''}`}
-                       onClick={(e) => handleNavClick(e, 'favorite')}>
-                        Улюблені {favoriteCount > 0 && `(${favoriteCount})`}
-                    </a>                    
-                    
-                    <a href="#watched" 
-                       className={`nav-link ${currentTab === 'watched' ? 'active' : ''}`}
-                       onClick={(e) => handleNavClick(e, 'watched')}>
-                        Переглянуті {watchedCount > 0 && `(${watchedCount})`}
-                    </a>
-
-                    <a href="#my-anime" 
-                        className={`nav-link ${currentTab === 'my-anime' ? 'active' : ''}`}
-                        onClick={(e) => handleNavClick(e, 'my-anime')}
+                    <NavLink 
+                        to="/" 
+                        end
+                        className={({ isActive }) => `nav-link ${isActive && currentTab === 'home' ? 'active' : ''}`}
+                        onClick={() => handleNavClick('home')}
                     >
-                            + Мої аніме
-                    </a>
+                        Головна
+                    </NavLink>
+                    
+                    <NavLink to="/popular" 
+                        className={`nav-link ${currentTab === 'popular' ? 'active' : ''}`}
+                        onClick={() => handleNavClick('popular')}>
+                        Популярні
+                    </NavLink>
+
+                    <NavLink to="/favorite"
+                        className={`nav-link ${currentTab === 'favorite' ? 'active' : ''}`}
+                        onClick={() => handleNavClick('favorite')}>
+                        Улюблені {favoriteCount > 0 && `(${favoriteCount})`}
+                    </NavLink>
+
+                    <NavLink to="/watched"
+                        className={`nav-link ${currentTab === 'watched' ? 'active' : ''}`}
+                        onClick={() => handleNavClick('watched')}>
+                        Переглянуті {watchedCount > 0 && `(${watchedCount})`}
+                    </NavLink>
+
+                    <NavLink to="/my-anime"
+                        className={`nav-link ${currentTab === 'my-anime' ? 'active' : ''}`}
+                        onClick={() => handleNavClick('my-anime')}
+                    >
+                        + Мої аніме
+                    </NavLink>
+
+                    <NavLink 
+                        to="/about" 
+                        className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                        onClick={() => setCurrentTab('')} // Скидаємо фільтр головної
+                    >
+                        Про застосунок
+                    </NavLink>
                 </nav>   
             </div>
         </header>
