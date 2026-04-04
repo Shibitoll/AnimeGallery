@@ -1,8 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 const Header = ({ favoriteCount, watchedCount, currentTab, setCurrentTab }) => {
-    
+    const { theme, toggleTheme } = useTheme();
+
     const handleNavClick = (tabName) => {
         setCurrentTab(tabName);
     };
@@ -53,6 +55,11 @@ const Header = ({ favoriteCount, watchedCount, currentTab, setCurrentTab }) => {
                     >
                         Про застосунок
                     </NavLink>
+
+                    <button onClick={toggleTheme} className="theme-toggle-btn">
+                        {theme === 'light' ? '🌙' : '☀️'}
+                    </button>
+        
                 </nav>   
             </div>
         </header>

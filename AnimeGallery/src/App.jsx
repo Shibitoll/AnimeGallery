@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import About from './pages/About';
 import AnimeDetails from './pages/AnimeDetails';
 import NotFound from './pages/NotFound';
+import { ThemeProvider } from './context/ThemeContext';
 import './styles/App.css';
 
 function App() {
@@ -68,50 +69,52 @@ function App() {
   };
 
   return (
-    <div className="app-wrapper">
-      <Header 
-        favoriteCount={animeList.filter(a => a.isFavorite).length} 
-        watchedCount={animeList.filter(a => a.isWatched).length}
-        currentTab={currentTab} 
-        setCurrentTab={setCurrentTab} 
-      />
-        <Routes>
-          <Route path="/" element={
-            <Main 
-              data={animeList} 
-              toggleFavorite={toggleFavorite} 
-              toggleWatched={toggleWatched}
-              currentTab={currentTab}
-              onAddAnime={addAnime}
-              onDeleteAnime={deleteAnime}
-              onUpdateRating={updateRating}
-            />
-          } />
+    <ThemeProvider>
+      <div className="app-wrapper">
+        <Header 
+          favoriteCount={animeList.filter(a => a.isFavorite).length} 
+          watchedCount={animeList.filter(a => a.isWatched).length}
+          currentTab={currentTab} 
+          setCurrentTab={setCurrentTab} 
+        />
+          <Routes>
+            <Route path="/" element={
+              <Main 
+                data={animeList} 
+                toggleFavorite={toggleFavorite} 
+                toggleWatched={toggleWatched}
+                currentTab={currentTab}
+                onAddAnime={addAnime}
+                onDeleteAnime={deleteAnime}
+                onUpdateRating={updateRating}
+              />
+            } />
 
-          <Route path="/popular" element={
-            <Main data={animeList} currentTab="popular" onToggleFavorite={toggleFavorite} />
-          } />
+            <Route path="/popular" element={
+              <Main data={animeList} currentTab="popular" onToggleFavorite={toggleFavorite} />
+            } />
 
-          <Route path="/favorite" element={
-            <Main data={animeList} currentTab="favorite" onToggleFavorite={toggleFavorite} />
-          } />
+            <Route path="/favorite" element={
+              <Main data={animeList} currentTab="favorite" onToggleFavorite={toggleFavorite} />
+            } />
 
-          <Route path="/watched" element={
-            <Main data={animeList} currentTab="watched" onToggleFavorite={toggleFavorite} />
-          } />
+            <Route path="/watched" element={
+              <Main data={animeList} currentTab="watched" onToggleFavorite={toggleFavorite} />
+            } />
 
-          <Route path="/my-anime" element={
-            <Main data={animeList} currentTab="my-anime" onToggleFavorite={toggleFavorite} />
-          } />
+            <Route path="/my-anime" element={
+              <Main data={animeList} currentTab="my-anime" onToggleFavorite={toggleFavorite} />
+            } />
 
-          <Route path="/about" element={<About />} />
+            <Route path="/about" element={<About />} />
 
-          <Route path="/anime/:id" element={<AnimeDetails allAnime={animeList} />} />
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      <Footer />
-    </div>
+            <Route path="/anime/:id" element={<AnimeDetails allAnime={animeList} />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        <Footer />
+      </div>
+    </ThemeProvider>
   );
 }
 
