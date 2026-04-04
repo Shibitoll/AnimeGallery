@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import About from './pages/About';
 import AnimeDetails from './pages/AnimeDetails';
 import NotFound from './pages/NotFound';
+import { ThemeProvider } from './context/ThemeContext';
 import './styles/App.css';
 
 /**
@@ -183,6 +184,7 @@ const deleteAnime = async (id) => {
 
 
   return (
+    <ThemeProvider>
     <div className="app-wrapper">
       <Header 
         favoriteCount={animeList.filter(a => a.isFavorite).length} 
@@ -227,6 +229,7 @@ const deleteAnime = async (id) => {
         </Routes>
       <Footer />
     </div>
+    </ThemeProvider>
   );
 }
 export default App;

@@ -10,21 +10,10 @@ html, body, #root {
   min-height: 100vh;
 }
 
-body {
-  margin: 0;
-  background-color: #f5f6f8;
-}
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f6f8;
-  color: #222;
 }
 
 a {
@@ -34,8 +23,8 @@ a {
 
 /* HEADER */
 .main-header {
-  background-color: #ffffff;
-  border-bottom: 1px solid #e5e5e5;
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--card-border);
   padding: 15px 40px;
 }
 
@@ -60,22 +49,23 @@ a {
   border-radius: 6px;
   transition: 0.2s;
   font-size: 14px;
-  color: #444;
+  color:var(--text-primary);
 }
 
 .nav-link:hover {
-  background-color: #f0f0f0;
+  background-color:var(--card-border);
 }
 
 .nav-link.active {
-  background-color: #111827;
-  color: white;
+  background-color:var(--text-primary);
+  color: var(--bg-color);
 }
 
 /* MAIN CONTENT */
 .main-content {
   padding: 40px;
   flex-grow: 1;
+  background-color: var(--bg-color);
 }
 
 .welcome-section {
@@ -118,7 +108,9 @@ a {
 
 /* CARD */
 .anime-card {
-  background-color: #ffffff;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-card);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -130,6 +122,17 @@ a {
 .anime-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.genre-tag {
+  background-color: var(--card-border); 
+  color: var(--text-secondary);
+}
+
+/* Кнопка "Бажаєте змінити?" */
+.edit-rating-btn {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
 }
 
 /* POSTER */
@@ -151,8 +154,8 @@ a {
   position: absolute;
   top: 10px;
   right: 10px;
-  background-color: #111827;
-  color: #fff;
+  background-color: var(--rating-bg);
+  color: var(--text-on-rating);
   font-size: 13px;
   padding: 5px 8px;
   border-radius: 8px;
@@ -161,6 +164,7 @@ a {
 /* CARD CONTENT */
 .card-content {
   padding: 15px;
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -168,13 +172,14 @@ a {
 }
 
 .card-title {
+  color: var(--text-primary);
   font-size: 16px;
   font-weight: 600;
 }
 
 .card-desc {
   font-size: 13px;
-  color: #555;
+  color: var(--text-secondary);
   line-height: 1.4;
 }
 
@@ -198,9 +203,9 @@ a {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #666;
+  color: var(--text-muted);
+  border-top: 1px solid var(--card-border);
   padding-top: 10px;
-  border-top: 1px solid #eee;
 }
 
 /* FOOTER */
@@ -209,9 +214,9 @@ a {
   padding: 20px;
   text-align: center;
   font-size: 14px;
-  background-color: #ffffff;
-  border-top: 1px solid #e5e5e5;
-  color: #555;
+  background-color: var(--footer-bg);
+  border-top: 1px solid var(--card-border);
+  color: var(--text-muted);
 }
 
 /* Кнопка статусу перегляду (внизу картки) */
@@ -318,7 +323,8 @@ a {
 .user-rating-section {
   margin-top: 15px;
   padding-top: 12px;
-  border-top: 1px dashed #e2e8f0; /* Пунктирна лінія відділяє секцію */
+  border-top: 1px dashed var(--card-border);
+  color: var(--text-primary); 
   font-size: 14px;
   display: flex;
   flex-direction: column;
@@ -327,11 +333,11 @@ a {
 
 .user-rating-section p {
   margin: 0 0 8px 0;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .user-rating-section strong {
-  color: #1e293b;
+  color: var(--accent-color);
   font-size: 16px;
   margin-left: 4px;
 }
@@ -358,8 +364,8 @@ a {
 /* Кнопка "Бажаєте змінити?" / "Зберегти" */
 .edit-rating-btn {
   background: transparent;
-  border: 1px solid #000000;
-  color: #100921;
+  color: var(--text-primary);
+  border: 1px solid var(--card-border);
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 13px;
@@ -389,14 +395,14 @@ a {
 
 /* Дизайн самої картки */
 .stat-card {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--card-border);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -417,7 +423,7 @@ a {
   display: block;
   font-size: 28px;
   font-weight: 700;
-  color: #0f172a; /* Темний колір для головної цифри */
+  color: var(--text-primary);
   margin: 8px 0;
 }
 
@@ -498,9 +504,9 @@ a {
 
 /* Специфічні стилі для карток з API */
 .api-card {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--card-border);
   transition: all 0.3s ease;
-  background: white;
+  background: var(--card-bg)
 }
 
 .api-card:hover {
@@ -546,10 +552,11 @@ a {
 .details-container {
   display: flex;
   gap: 40px;
-  background: #fff;
+  background: var(--card-bg);
   padding: 30px;
   border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px var(--card-border);
+  color: var(--text-primary);
 }
 
 .details-poster {
@@ -569,7 +576,7 @@ a {
 
 .details-info h1 {
   font-size: 32px;
-  color: #111827;
+  color:var(--text-primary);
   line-height: 1.2;
 }
 
@@ -597,7 +604,7 @@ a {
 
 .details-desc p {
   line-height: 1.6;
-  color: #4b5563;
+  color: var(--text-secondary);
   font-size: 15px;
 }
 
@@ -629,18 +636,19 @@ a {
     width: 100%; 
     margin: auto; 
     padding: 60px 40px; 
-    background: white;
+    background: var(--card-bg);
     border-radius: 24px; 
     box-shadow: 0 10px 40px rgba(0,0,0,0.04); 
-    border: 1px solid rgba(0,0,0,0.02);
+    border: 1px solid var(--card-border);
     text-align: center;
+    color: var(--text-primary);
 }
 
 .page-container h2 {
     font-size: 32px;
     margin-bottom: 25px;
-    color: #111827;
-    background: linear-gradient(90deg, #111827, #3498db);
+    color: var(--text-primary);
+    background: linear-gradient(90deg, var(--text-primary), var(--accent-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -648,7 +656,7 @@ a {
 .page-container p {
     font-size: 18px;
     line-height: 1.6;
-    color: #4b5563;
+    color: var(--text-secondary);
     margin-bottom: 20px;
 }
 
@@ -694,4 +702,43 @@ a {
 .api-status-container h2 {
   margin-top: 0;
   margin-bottom: 10px;
+}
+
+:root {
+  /* Світла тема */
+  --bg-color: #f5f6f8;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --accent-color: #3b82f6;
+  --header-bg: #ffffff;
+  --footer-bg: #ffffff;
+  --rating-bg: #111827;
+  --text-on-rating: #ffffff;
+}
+
+.dark-theme {
+  /* Темна тема */
+  --bg-color: #0f172a;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1; /* Контрастний сірий */
+  --text-muted: #94a3b8;
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --accent-color: #60a5fa;
+  --header-bg: #1e293b;
+  --footer-bg: #1e293b;
+  --rating-bg: #f8fafc;
+  --text-on-rating: #0f172a;
+}
+
+/* Глобальні стилі body (для плавного переходу) */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
 }

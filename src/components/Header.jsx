@@ -1,27 +1,27 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 /**
  * Компонент верхньої панелі (Header) застосунку.
  * * Містить логотип та систему навігації по вкладках. Відображає динамічні лічильники
  * для категорій "Улюблені" та "Переглянуті", а також керує станом активної вкладки.
- * * @component
+* * @component
  * @param {Object} props - Властивості компонента.
  * @param {number} props.favoriteCount - Кількість аніме, доданих в обране.
  * @param {number} props.watchedCount - Кількість переглянутих аніме.
- * @param {string} props.currentTab - Назва поточної активної вкладки ('home', 'popular', 'favorite', 'watched', 'my-anime').
- * @param {Function} props.setCurrentTab - Функція для зміни активної вкладки в головному стані App.
+ * @param {string} props.currentTab - Назва поточної активної вкладки.
+ * @param {Function} props.setCurrentTab - Функція для зміни активної вкладки.
  */
 const Header = ({ favoriteCount, watchedCount, currentTab, setCurrentTab }) => {
+    const { theme, toggleTheme } = useTheme();
+
     /**
      * Обробник кліку по посиланнях навігації.
-     * Запобігає стандартній поведінці браузера (перезавантаженню сторінки) 
-     * та перемикає вкладку.
+     * Оновлює стан активної вкладки в глобальному контексті застосунку.
      * * @function handleNavClick
-     * @memberof Header
      * @param {string} tabName - Назва вкладки, на яку здійснюється перехід.
      */
-
     const handleNavClick = (tabName) => {
         setCurrentTab(tabName);
     };
@@ -72,6 +72,11 @@ const Header = ({ favoriteCount, watchedCount, currentTab, setCurrentTab }) => {
                     >
                         Про застосунок
                     </NavLink>
+
+                    <button onClick={toggleTheme} className="theme-toggle-btn">
+                        {theme === 'light' ? '🌙' : '☀️'}
+                    </button>
+        
                 </nav>   
             </div>
         </header>
