@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Button, Input } from './ui';
 import '../styles/AddAnimeForm.css'; 
 
 /**
@@ -72,52 +73,76 @@ const AddAnimeForm = ({ onAddAnime }) => {
     <div className="add-anime-form-container">
       <form onSubmit={handleSubmit} className="add-anime-form">
         
-        <div className="form-group">
-          <label>Назва аніме * (обов'язково)</label>
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Наприклад: Cyberpunk: Edgerunners" />
-        </div>
+        {/* Використовуємо UI-компонент Input */}
+        <Input 
+          label="Назва аніме * (обов'язково)" 
+          value={title} 
+          onChange={(e) => setTitle(e.target.value)} 
+          placeholder="Наприклад: Cyberpunk: Edgerunners" 
+        />
 
         <div className="form-grid">
+          <Input 
+            label="Жанри (через кому)" 
+            value={genres} 
+            onChange={(e) => setGenres(e.target.value)} 
+            placeholder="Екшн, Фантастика..." 
+          />
+          <Input 
+            label="Рік випуску" 
+            type="number"
+            value={year} 
+            onChange={(e) => setYear(e.target.value)} 
+            placeholder="2022" 
+          />
+          <Input 
+            label="Кількість епізодів" 
+            value={episodes} 
+            onChange={(e) => setEpisodes(e.target.value)} 
+            placeholder="10 еп." 
+          />
+          <Input 
+            label="Студія" 
+            value={studio} 
+            onChange={(e) => setStudio(e.target.value)} 
+            placeholder="Studio Trigger" 
+          />
+          <Input 
+            label="Ваша оцінка (рейтинг)" 
+            value={rating} 
+            onChange={(e) => setRating(e.target.value)} 
+            placeholder="9.5" 
+          />
+
           <div className="form-group">
-            <label>Жанри (через кому)</label>
-            <input type="text" value={genres} onChange={(e) => setGenres(e.target.value)} placeholder="Екшн, Фантастика..." />
-          </div>
-          <div className="form-group">
-            <label>Рік випуску</label>
-            <input type="number" value={year} onChange={(e) => setYear(e.target.value)} placeholder="Наприклад: 2022" />
-          </div>
-          <div className="form-group">
-            <label>Кількість епізодів</label>
-            <input type="text" value={episodes} onChange={(e) => setEpisodes(e.target.value)} placeholder="10 еп." />
-          </div>
-          <div className="form-group">
-            <label>Студія</label>
-            <input type="text" value={studio} onChange={(e) => setStudio(e.target.value)} placeholder="Studio Trigger" />
-          </div>
-          <div className="form-group">
-            <label>Ваша оцінка (рейтинг)</label>
-            <input type="text" value={rating} onChange={(e) => setRating(e.target.value)} placeholder="Наприклад: 9.5" />
-          </div>
-          <div className="form-group">
-            <label>Статус перегляду</label>
-            <select value={status} onChange={(e) => setStatus(e.target.value)}>
+            <label className="form-label-legacy">Статус перегляду</label>
+            <select value={status} onChange={(e) => setStatus(e.target.value)} className="form-select-custom">
               <option value="plan">Буду дивитись</option>
               <option value="watched">Вже переглянуто</option>
             </select>
           </div>
         </div>
 
-        <div className="form-group">
-          <label>URL-посилання на постер (картинку)</label>
-          <input type="text" value={poster} onChange={(e) => setPoster(e.target.value)} placeholder="https://..." />
-        </div>
+        <Input 
+          label="URL-посилання на постер (картинку)" 
+          value={poster} 
+          onChange={(e) => setPoster(e.target.value)} 
+          placeholder="https://..." 
+        />
 
         <div className="form-group">
-          <label>Короткий опис або ваші враження</label>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Про що це аніме?"></textarea>
+          <label className="form-label-legacy">Короткий опис або ваші враження</label>
+          <textarea 
+            value={description} 
+            onChange={(e) => setDescription(e.target.value)} 
+            placeholder="Про що це аніме?"
+            className="form-textarea-custom"
+          ></textarea>
         </div>
 
-        <button type="submit" className="submit-btn">+ Додати до мого каталогу</button>
+        <Button type="submit" variant="primary" className="submit-btn-wide">
+          + Додати до мого каталогу
+        </Button>
       </form>
     </div>
   );

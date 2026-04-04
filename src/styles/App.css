@@ -1,27 +1,14 @@
-/* GLOBAL */
-html, body, #root {
-  height: 100%;
-  width: 100%;
-}
-
 .app-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.main-content {
+  padding: 40px;
+  flex-grow: 1;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* HEADER */
 .main-header {
   background-color: var(--header-bg);
   border-bottom: 1px solid var(--card-border);
@@ -37,10 +24,13 @@ a {
 .logo {
   font-size: 22px;
   font-weight: bold;
+  color: var(--text-primary);
 }
 
+/* NAVIGATION */
 .main-nav {
   display: flex;
+  align-items: center;
   gap: 20px;
 }
 
@@ -49,25 +39,23 @@ a {
   border-radius: 6px;
   transition: 0.2s;
   font-size: 14px;
-  color:var(--text-primary);
+  color: var(--text-primary);
+  text-decoration: none;
 }
 
 .nav-link:hover {
-  background-color:var(--card-border);
+  background-color: var(--card-border);
 }
 
 .nav-link.active {
-  background-color:var(--text-primary);
+  background-color: var(--text-primary);
   color: var(--bg-color);
 }
 
-/* MAIN CONTENT */
-.main-content {
-  padding: 40px;
-  flex-grow: 1;
-  background-color: var(--bg-color);
+.theme-toggle-btn {
+  margin-left: 10px;
 }
-
+/* SECTIONS */
 .welcome-section {
   text-align: center;
   margin-bottom: 40px;
@@ -78,11 +66,6 @@ a {
   margin-bottom: 10px;
 }
 
-.welcome-section p {
-  color: #666;
-}
-
-/* TITLE */
 .gallery-title {
   font-size: 20px;
   margin-bottom: 20px;
@@ -92,50 +75,30 @@ a {
 }
 
 .title-badge {
-  background-color: #e5e7eb;
+  background-color: var(--card-border);
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 12px;
-  color: #333;
 }
 
-/* GRID */
+/* GRIDS */
 .anime-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 25px;
 }
 
-/* CARD */
-.anime-card {
-  background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--shadow-card);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: 0.3s ease;
-  display: flex;
-  flex-direction: column;
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
 }
 
 .anime-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
 
-.genre-tag {
-  background-color: var(--card-border); 
-  color: var(--text-secondary);
-}
-
-/* Кнопка "Бажаєте змінити?" */
-.edit-rating-btn {
-  color: var(--text-primary);
-  border-color: var(--text-muted);
-}
-
-/* POSTER */
 .poster-wrapper {
   position: relative;
   width: 100%;
@@ -149,66 +112,161 @@ a {
   object-fit: cover;
 }
 
-/* Rating badge */
 .rating-badge {
   position: absolute;
   top: 10px;
   right: 10px;
-  background-color: var(--rating-bg);
-  color: var(--text-on-rating);
   font-size: 13px;
   padding: 5px 8px;
   border-radius: 8px;
+  background-color: var(--rating-bg);
+  color: var(--text-on-rating);
 }
 
-/* CARD CONTENT */
 .card-content {
-  padding: 15px;
-  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   gap: 10px;
   flex-grow: 1;
 }
 
-.card-title {
-  color: var(--text-primary);
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.card-desc {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.4;
-}
-
-/* Genres */
 .genres-list {
   margin-top: 5px;
 }
 
 .genre-tag {
   display: inline-block;
-  background-color: #f3f4f6;
   padding: 4px 8px;
   border-radius: 10px;
   font-size: 12px;
-  color: #444;
+  background-color: var(--card-border);
+  color: var(--text-secondary);
 }
 
-/* Footer info */
 .card-footer-info {
   margin-top: auto;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; 
+  align-items: center;
   font-size: 12px;
   color: var(--text-muted);
   border-top: 1px solid var(--card-border);
-  padding-top: 10px;
+  padding-top: 12px;
+  margin-bottom: 15px; 
 }
 
-/* FOOTER */
+.watch-status-btn {
+  width: 100%;
+  padding: 10px 0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 15px; 
+  transition: all 0.2s ease;
+}
+
+/* Колір для кнопки "Буду дивитись"*/
+.watch-status-btn:not(.is-watched) {
+  background-color: var(--card-border);
+  color: var(--text-primary);
+}
+
+/* Колір для кнопки "Переглянуто" */
+.watch-status-btn.is-watched {
+  background-color: #10b981 !important;
+  color: white !important;
+}
+
+.stat-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.stat-info h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.stat-value {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.stat-icon {
+  font-size: 24px;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--bg-color);
+}
+
+/* API & STATUS */
+.api-status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  margin: 40px auto;
+  max-width: 800px;
+  border-radius: 16px;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--card-border);
+  border-top: 5px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.details-container {
+  display: flex;
+  gap: 40px;
+  padding: 30px;
+  border-radius: 20px;
+}
+
+.details-poster {
+  width: 350px;
+  height: 500px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.details-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+
+.page-container {
+    max-width: 800px;
+    width: 100%; 
+    margin: auto; 
+    padding: 60px 40px; 
+    border-radius: 24px; 
+    text-align: center;
+}
+
 .app-footer {
   margin-top: 50px;
   padding: 20px;
@@ -219,319 +277,95 @@ a {
   color: var(--text-muted);
 }
 
-/* Кнопка статусу перегляду (внизу картки) */
-.watch-status-btn {
-  width: 100%;
-  margin-top: 15px;
-  padding: 8px 0;
-  border: none;
-  border-radius: 8px;
-  background-color: #f0f0f0;
-  color: #1a1a1a;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.watch-status-btn:hover {
-  background-color: #e5e5e5;
-}
-
-/* Стан, коли аніме переглянуто */
-.watch-status-btn.is-watched {
-  background-color: #10b981; 
-  color: white;
-}
-
-.watch-status-btn.is-watched:hover {
-  background-color: #059669; 
-}
-
-/* Робимо картку трохи тьмянішою, якщо вона вже переглянута */
-.anime-card.watched-card .card-image {
-  opacity: 0.85; 
-}
-
-/* Кнопка лайку */
-.favorite-btn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background-color: #ffffff; 
-  border: 1.5px solid #000000; 
-  border-radius: 50%; 
-  width: 34px; 
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 14px;
-  color: #000000; 
-  font-size: 18px; 
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4); 
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  z-index: 2;
-}
-
-/* Ефект при наведенні мишки */
-.favorite-btn:hover {
-  transform: scale(1.15);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
-}
-
-/* Відступи для додаткових секцій (Улюблені, Переглянуті) на головній сторінці */
-.category-section {
-  margin-top: 50px;
-}
-
-/* Стиль для повідомлення, коли список порожній */
-.empty-message {
-  text-align: center;
-  color: #666;
-  margin-top: 40px;
-  font-size: 16px;
-}
-
-/* Кнопка видалення власного аніме (поруч із сердечком) */
-.delete-btn {
-  position: absolute;
-  top: 10px;
-  left: 54px; 
-  background-color: #ffffff;
-  border: 1.5px solid #ef4444; 
-  border-radius: 50%;
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 16px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-  transition: transform 0.2s ease, background-color 0.2s ease;
-  z-index: 2;
-}
-
-.delete-btn:hover {
-  background-color: #fee2e2; 
-  transform: scale(1.15);
-}
-
-/* Контейнер для секції оцінки */
-.user-rating-section {
-  margin-top: 15px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--card-border);
-  color: var(--text-primary); 
-  font-size: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Центруємо вміст */
-}
-
-.user-rating-section p {
-  margin: 0 0 8px 0;
-  color: var(--text-secondary);
-}
-
-.user-rating-section strong {
-  color: var(--accent-color);
-  font-size: 16px;
-  margin-left: 4px;
-}
-
-/* Поле вводу оцінки */
-.rating-input {
-  width: 60px;
-  padding: 4px 8px;
-  margin-left: 8px;
-  border: 2px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  outline: none;
-  transition: border-color 0.2s ease;
-  text-align: center;
-}
-
-.rating-input:focus {
-  border-color: #8b5cf6; /* Підсвічується фіолетовим при введенні */
-}
-
-/* Кнопка "Бажаєте змінити?" / "Зберегти" */
-.edit-rating-btn {
-  background: transparent;
-  color: var(--text-primary);
-  border: 1px solid var(--card-border);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-}
-
-.edit-rating-btn:hover {
-  background: #100921;
-  color: white;
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
-}
-
-.edit-rating-btn:active {
-  transform: scale(0.96);
-}
-
-/* Сітка для карток статистики */
-.dashboard-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-/* Дизайн самої картки */
 .stat-card {
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 20px;
+  position: relative; 
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  border: 1px solid var(--card-border);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 120px; 
+  padding: 20px;
 }
 
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-}
-
-/* Текстова частина */
-.stat-info h4 {
-  margin: 0;
-  font-size: 14px;
-  color: #64748b; /* М'який сірий колір заголовку */
-  font-weight: 500;
-}
-
-.stat-value {
-  display: block;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 8px 0;
-}
-
-.stat-desc {
-  margin: 0;
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-/* Іконки праворуч */
 .stat-icon {
+  position: absolute;
+  top: 15px;        
+  right: 15px;        
+  
   font-size: 24px;
-  background: #f8fafc;
+  background: var(--bg-color);
   width: 45px;
   height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 10px;
+  
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-/* Стилі для секції API */
+.stat-info {
+  padding-right: 50px; 
+}
 
-/* Контейнер для станів Loading та Error */
-.api-status-container {
+.poster-wrapper {
+  position: relative; 
+  overflow: hidden;
+}
+
+.favorite-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  
+  background: #ffffff; 
+  
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding: 60px 20px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s ease;
+  z-index: 10;
+  
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); 
+}
+
+.favorite-btn:hover {
+  transform: scale(1.1);
   background: #fdfdfd;
-  border: 1px solid #eee;
-  border-radius: 16px;
-  margin: 40px auto;
-  max-width: 800px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Спінер завантаження (CSS анімація) */
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #3498db; /* Основний колір сайту */
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+.favorite-btn.active {
+  box-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
 }
 
-.loading-text {
-  font-size: 1.2rem;
-  color: #666;
-  font-weight: 500;
+.favorite-btn.active .heart-icon {
+  color: #ff4757; 
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.details-link-btn {
+  background-color: transparent !important;
+  border: 1px solid var(--accent-color) !important;
+  color: var(--accent-color) !important;
+  
+  padding: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
-/* Оформлення блоку помилки */
-.api-status-container.error-block {
-  background: #fff5f5;
-  border: 1px solid #ffcdd2;
+.details-link-btn:hover {
+  background-color: var(--accent-color) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
-.error-icon {
-  font-size: 3rem;
-  margin-bottom: 15px;
-}
-
-.error-text {
-  font-size: 1.1rem;
-  color: #d32f2f;
-  font-weight: 500;
-}
-
-/* Специфічні стилі для карток з API */
-.api-card {
-  border: 1px solid var(--card-border);
-  transition: all 0.3s ease;
-  background: var(--card-bg)
-}
-
-.api-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-  border-color: #3498db;
-}
-
-/* Колір бейджа для рейтингу MyAnimeList (Jikan) */
-.mal-rating {
-  background: #2e51a2 !important; 
-  color: white !important;
-}
-
-/* Розділювач */
-.section-divider {
-  margin: 50px auto;
-  width: 80%;
-  border: 0;
-  border-top: 2px dashed #ccc;
-}
-
-/* ANIME DETAILS PAGE */
 .anime-details-page {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 40px auto;
   padding: 0 20px;
 }
@@ -539,24 +373,28 @@ a {
 .back-link {
   display: inline-block;
   margin-bottom: 20px;
-  color: #3498db;
+  color: var(--accent-color);
   font-weight: 600;
+  text-decoration: none;
   transition: transform 0.2s ease;
 }
 
 .back-link:hover {
   transform: translateX(-5px);
-  color: #2980b9;
+  color: var(--accent-color);
+  opacity: 0.8;
 }
 
 .details-container {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.details-container > div {
   display: flex;
   gap: 40px;
-  background: var(--card-bg);
   padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px var(--card-border);
-  color: var(--text-primary);
+  align-items: flex-start;
 }
 
 .details-poster {
@@ -565,6 +403,7 @@ a {
   object-fit: cover;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .details-info {
@@ -572,24 +411,32 @@ a {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  text-align: left;
 }
 
 .details-info h1 {
   font-size: 32px;
-  color:var(--text-primary);
+  color: var(--text-primary);
   line-height: 1.2;
+  margin: 0;
 }
 
-.details-genre b, .details-meta b, .details-rating b {
-  color: #64748b;
+.details-info p {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.details-genre b, 
+.details-meta b, 
+.details-rating b {
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .details-rating {
   font-size: 18px;
-  color: #1e293b;
   padding: 10px 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--card-border);
 }
 
 .details-desc {
@@ -599,7 +446,7 @@ a {
 .details-desc h3 {
   margin-bottom: 10px;
   font-size: 18px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .details-desc p {
@@ -608,40 +455,56 @@ a {
   font-size: 15px;
 }
 
-/* Адаптивність для мобільних пристроїв */
-@media (max-width: 768px) {
-  .details-container {
+@media (max-width: 850px) {
+  .details-container > div {
     flex-direction: column;
     align-items: center;
   }
   .details-poster {
     width: 100%;
-    max-width: 300px;
+    max-width: 350px;
     height: auto;
   }
 }
 
-/* ABOUT PAGE */
-.app-wrapper > div:has(.page-container), 
-.app-wrapper > div:has(.api-status-container) {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px; 
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content, 
+.anime-details-page, 
+.page-container {
+  flex: 1 0 auto;
+}
+
+.app-footer {
+  flex-shrink: 0; 
+  padding: 20px;
+  text-align: center;
+  background-color: var(--footer-bg);
+  border-top: 1px solid var(--card-border);
+  color: var(--text-muted);
 }
 
 .page-container {
+    flex: 1; 
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    padding: 40px 20px;
+}
+
+.page-container .card { 
     max-width: 800px;
-    width: 100%; 
-    margin: auto; 
-    padding: 60px 40px; 
-    background: var(--card-bg);
-    border-radius: 24px; 
-    box-shadow: 0 10px 40px rgba(0,0,0,0.04); 
-    border: 1px solid var(--card-border);
+    width: 100%;
+    padding: 60px 40px;
     text-align: center;
-    color: var(--text-primary);
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--card-border);
+    background-color: var(--card-bg);
 }
 
 .page-container h2 {
@@ -658,87 +521,7 @@ a {
     line-height: 1.6;
     color: var(--text-secondary);
     margin-bottom: 20px;
-}
-
-.page-container p i {
-    display: block;
-    margin-top: 30px;
-    font-size: 14px;
-    color: #94a3b8;
-    border-top: 1px solid #f1f5f9;
-    padding-top: 20px;
-}
-
-/* Кнопка ДЕТАЛЬНІШЕ у картці */
-.details-link {
-  display: block;
-  width: 100%;
-  text-align: center;
-  margin-top: 10px;
-  padding: 8px;
-  background-color: transparent;
-  color: #3498db;
-  border: 1px solid #3498db;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 13px;
-  transition: all 0.2s ease;
-}
-
-.details-link:hover {
-  background-color: #3498db;
-  color: white;
-  text-decoration: none;
-}
-
-/* NOT FOUND PAGE SPECIFIC */
-.api-status-container h1 {
-  font-size: 80px;
-  margin: 0;
-  color: #e5e7eb;
-  line-height: 1;
-}
-
-.api-status-container h2 {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-:root {
-  /* Світла тема */
-  --bg-color: #f5f6f8;
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
-  --text-muted: #6b7280;
-  --card-bg: #ffffff;
-  --card-border: #e5e7eb;
-  --accent-color: #3b82f6;
-  --header-bg: #ffffff;
-  --footer-bg: #ffffff;
-  --rating-bg: #111827;
-  --text-on-rating: #ffffff;
-}
-
-.dark-theme {
-  /* Темна тема */
-  --bg-color: #0f172a;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1; /* Контрастний сірий */
-  --text-muted: #94a3b8;
-  --card-bg: #1e293b;
-  --card-border: #334155;
-  --accent-color: #60a5fa;
-  --header-bg: #1e293b;
-  --footer-bg: #1e293b;
-  --rating-bg: #f8fafc;
-  --text-on-rating: #0f172a;
-}
-
-/* Глобальні стилі body (для плавного переходу) */
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
-  min-height: 100vh;
+    max-width: 650px;
+    margin-left: auto;
+    margin-right: auto;
 }

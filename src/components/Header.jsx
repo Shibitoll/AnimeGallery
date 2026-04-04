@@ -1,29 +1,38 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { Button } from './ui';
 
 /**
  * Компонент верхньої панелі (Header) застосунку.
- * * Містить логотип та систему навігації по вкладках. Відображає динамічні лічильники
- * для категорій "Улюблені" та "Переглянуті", а також керує станом активної вкладки.
-* * @component
+ * * Містить логотип та систему навігації. Відображає динамічні лічильники
+ * для категорій "Улюблені" та "Переглянуті", керує станом активної вкладки
+ * через синхронізацію з Main та перемикає тему оформлення.
+ * * @component
  * @param {Object} props - Властивості компонента.
- * @param {number} props.favoriteCount - Кількість аніме, доданих в обране.
+ * @param {number} props.favoriteCount - Кількість аніме в обраному.
  * @param {number} props.watchedCount - Кількість переглянутих аніме.
- * @param {string} props.currentTab - Назва поточної активної вкладки.
+ * @param {string} props.currentTab - ID поточної активної вкладки.
  * @param {Function} props.setCurrentTab - Функція для зміни активної вкладки.
  */
 const Header = ({ favoriteCount, watchedCount, currentTab, setCurrentTab }) => {
     const { theme, toggleTheme } = useTheme();
 
     /**
+     * Функція для визначення класів NavLink.
+     * Додає клас 'active' автоматично при збігу маршруту або стану currentTab.
+     */
+    const navLinkClass = ({ isActive }) => 
+        `nav-link ${isActive || (currentTab && isActive) ? 'active' : ''}`;
+
+    /**
      * Обробник кліку по посиланнях навігації.
-     * Оновлює стан активної вкладки в глобальному контексті застосунку.
-     * * @function handleNavClick
-     * @param {string} tabName - Назва вкладки, на яку здійснюється перехід.
+     * Оновлює стан для коректної фільтрації контенту в компоненті Main.
      */
     const handleNavClick = (tabName) => {
-        setCurrentTab(tabName);
+        if (setCurrentTab) {
+            setCurrentTab(tabName);
+        }
     };
 
     return (
@@ -33,33 +42,40 @@ const Header = ({ favoriteCount, watchedCount, currentTab, setCurrentTab }) => {
                 <nav className="main-nav">
                     <NavLink 
                         to="/" 
-                        end
-                        className={({ isActive }) => `nav-link ${isActive && currentTab === 'home' ? 'active' : ''}`}
+                        end 
+                        className={navLinkClass} 
                         onClick={() => handleNavClick('home')}
                     >
                         Головна
                     </NavLink>
                     
-                    <NavLink to="/popular" 
-                        className={`nav-link ${currentTab === 'popular' ? 'active' : ''}`}
-                        onClick={() => handleNavClick('popular')}>
+                    <NavLink 
+                        to="/popular" 
+                        className={navLinkClass} 
+                        onClick={() => handleNavClick('popular')}
+                    >
                         Популярні
                     </NavLink>
 
-                    <NavLink to="/favorite"
-                        className={`nav-link ${currentTab === 'favorite' ? 'active' : ''}`}
-                        onClick={() => handleNavClick('favorite')}>
+                    <NavLink 
+                        to="/favorite" 
+                        className={navLinkClass} 
+                        onClick={() => handleNavClick('favorite')}
+                    >
                         Улюблені {favoriteCount > 0 && `(${favoriteCount})`}
                     </NavLink>
 
-                    <NavLink to="/watched"
-                        className={`nav-link ${currentTab === 'watched' ? 'active' : ''}`}
-                        onClick={() => handleNavClick('watched')}>
+                    <NavLink 
+                        to="/watched" 
+                        className={navLinkClass} 
+                        onClick={() => handleNavClick('watched')}
+                    >
                         Переглянуті {watchedCount > 0 && `(${watchedCount})`}
                     </NavLink>
 
-                    <NavLink to="/my-anime"
-                        className={`nav-link ${currentTab === 'my-anime' ? 'active' : ''}`}
+                    <NavLink 
+                        to="/my-anime" 
+                        className={navLinkClass} 
                         onClick={() => handleNavClick('my-anime')}
                     >
                         + Мої аніме
@@ -67,16 +83,20 @@ const Header = ({ favoriteCount, watchedCount, currentTab, setCurrentTab }) => {
 
                     <NavLink 
                         to="/about" 
-                        className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                        onClick={() => setCurrentTab('')} // Скидаємо фільтр головної
+                        className={navLinkClass} 
+                        onClick={() => handleNavClick('')}
                     >
                         Про застосунок
                     </NavLink>
 
-                    <button onClick={toggleTheme} className="theme-toggle-btn">
+                    <Button 
+                        onClick={toggleTheme} 
+                        variant="secondary" 
+                        className="theme-toggle-btn"
+                        title="Змінити тему"
+                    >
                         {theme === 'light' ? '🌙' : '☀️'}
-                    </button>
-        
+                    </Button>
                 </nav>   
             </div>
         </header>

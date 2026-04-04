@@ -1,9 +1,9 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Card } from '../components/ui';
 
 const AnimeDetails = ({ allAnime }) => {
   const { id } = useParams();
-  // Пошук аніме за ID (приводимо до числа, якщо ID в масиві — число)
   const anime = allAnime.find(item => item.id.toString() === id);
 
   if (!anime) {
@@ -19,7 +19,9 @@ const AnimeDetails = ({ allAnime }) => {
   return (
     <div className="anime-details-page">
       <Link to="/" className="back-link">← Назад до списку</Link>
-      <div className="details-container">
+      
+      {}
+      <Card className="details-container">
         <img src={anime.poster} alt={anime.title} className="details-poster" />
         <div className="details-info">
           <h1>{anime.title}</h1>
@@ -31,7 +33,7 @@ const AnimeDetails = ({ allAnime }) => {
             <p>{anime.description || "Опис для цього аніме ще не додано."}</p>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

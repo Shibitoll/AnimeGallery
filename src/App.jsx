@@ -12,7 +12,7 @@ import './styles/App.css';
 /**
  * Головний компонент застосунку AnimeGallery.
  * Управляє глобальним станом списку аніме, навігацією та взаємодією з API.
- * * @component
+ * @component
  */
 function App() {
   const [animeList, setAnimeList] = useState([]);
@@ -21,14 +21,8 @@ function App() {
 
   const API_URL = 'http://127.0.0.1:8000/api/animes/';
 
-/**
-   * Завантажує список аніме з бекенду при першому рендері компонента.
-   * Використовує асинхронну функцію всередині useEffect.
-   * @function fetchAnime
-   * @memberof App
-   * @inner
-   * @async
-   * @returns {void}
+  /**
+   * Завантажує список аніме з бекенду при першому рендері.
    */
   useEffect(() => {
     const fetchAnime = async () => {
@@ -36,6 +30,7 @@ function App() {
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error('Помилка мережі');
         const data = await response.json();
+        // Перевірка структури даних (DRF зазвичай повертає results)
         const actualAnimeArray = data.results ? data.results : data;
         setAnimeList(actualAnimeArray);
       } catch (error) {
@@ -47,13 +42,8 @@ function App() {
     fetchAnime();
   }, []);
 
-/**
-   * Оновлює статус "Улюблене" для конкретного аніме через PATCH-запит.
-   * @function toggleFavorite
-   * @memberof App
-   * @inner
-   * @async
-   * @param {number} id - Унікальний ідентифікатор аніме.
+  /**
+   * Оновлює статус "Улюблене" через PATCH-запит.
    */
   const toggleFavorite = async (id) => {
     const anime = animeList.find(a => a.id === id);
@@ -72,13 +62,8 @@ function App() {
     }
   };
 
-/**
-   * Оновлює статус "Переглянуто" для конкретного аніме через PATCH-запит.
-   * @function toggleWatched
-   * @memberof App
-   * @inner
-   * @async
-   * @param {number} id - Унікальний ідентифікатор аніме.
+  /**
+   * Оновлює статус "Переглянуто" через PATCH-запит.
    */
   const toggleWatched = async (id) => {
     const anime = animeList.find(a => a.id === id);
@@ -97,72 +82,45 @@ function App() {
     }
   };
 
-/**
-   * Додає новий запис аніме до бази даних через POST-запит.
-   * @function addAnime
-   * @memberof App
-   * @inner
-   * @async
-   * @param {Object} newAnime - Об'єкт з даними нового аніме (title, genres, rating тощо).
+  /**
+   * Додає нове аніме через POST-запит.
    */
-const addAnime = async (newAnime) => {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newAnime) // Просто передаємо об'єкт з форми
-    });
-
-    if (response.ok) {
-      const savedAnime = await response.json();
-      setAnimeList(prev => [savedAnime, ...prev]);
-    } else {
-      const errorData = await response.json();
-      console.error("Деталі помилки 400:", errorData);
-    }
-  } catch (error) {
-    console.error("Помилка при додаванні:", error);
-  }
-};
-
-/**
-   * Видаляє аніме з бази даних через DELETE-запит після підтвердження користувачем.
-   * @function deleteAnime
-   * @memberof App
-   * @inner
-   * @async
-   * @param {number} id - Ідентифікатор аніме для видалення.
-   */
-const deleteAnime = async (id) => {
-  const isConfirmed = window.confirm("Ви впевнені, що хочете видалити це аніме?");
-  if (!isConfirmed) return;
-
-  try {
-    const response = await fetch(`${API_URL}${id}/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
+  const addAnime = async (newAnime) => {
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAnime)
+      });
+      if (response.ok) {
+        const savedAnime = await response.json();
+        setAnimeList(prev => [savedAnime, ...prev]);
       }
-    });
-
-    if (response.ok) {
-      setAnimeList(prev => prev.filter(a => a.id !== id));
-    } else {
-      console.error("Сервер відхилив видалення. Статус:", response.status);
+    } catch (error) {
+      console.error("Помилка при додаванні:", error);
     }
-  } catch (error) {
-    console.error("Помилка мережі при видаленні:", error);
-  }
-};
+  };
 
-/**
-   * Оновлює персональну оцінку аніме через PATCH-запит.
-   * @function updateRating
-   * @memberof App
-   * @inner
-   * @async
-   * @param {number} id - Ідентифікатор аніме.
-   * @param {number|string} newRating - Нове значення рейтингу (від 0 до 10).
+  /**
+   * Видаляє аніме через DELETE-запит.
+   */
+  const deleteAnime = async (id) => {
+    const isConfirmed = window.confirm("Ви впевнені, що хочете видалити це аніме?");
+    if (!isConfirmed) return;
+    try {
+      const response = await fetch(`${API_URL}${id}/`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        setAnimeList(prev => prev.filter(a => a.id !== id));
+      }
+    } catch (error) {
+      console.error("Помилка мережі при видаленні:", error);
+    }
+  };
+
+  /**
+   * Оновлює рейтинг через PATCH-запит.
    */
   const updateRating = async (id, newRating) => {
     try {
@@ -182,23 +140,23 @@ const deleteAnime = async (id) => {
 
   if (loading) return <div className="loading">Завантаження...</div>;
 
-
   return (
     <ThemeProvider>
-    <div className="app-wrapper">
-      <Header 
-        favoriteCount={animeList.filter(a => a.isFavorite).length} 
-        watchedCount={animeList.filter(a => a.isWatched).length}
-        currentTab={currentTab} 
-        setCurrentTab={setCurrentTab} 
-      />
-<Routes>
+      <div className="app-wrapper">
+        <Header 
+          favoriteCount={animeList.filter(a => a.isFavorite).length} 
+          watchedCount={animeList.filter(a => a.isWatched).length}
+          currentTab={currentTab} 
+          setCurrentTab={setCurrentTab} 
+        />
+        
+        <Routes>
           <Route path="/" element={
             <Main 
               data={animeList} 
+              currentTab="home"
               toggleFavorite={toggleFavorite} 
               toggleWatched={toggleWatched}
-              currentTab={currentTab}
               onAddAnime={addAnime}
               onDeleteAnime={deleteAnime}
               onUpdateRating={updateRating}
@@ -206,30 +164,59 @@ const deleteAnime = async (id) => {
           } />
 
           <Route path="/popular" element={
-            <Main data={animeList} currentTab="popular" onToggleFavorite={toggleFavorite} />
+            <Main 
+              data={animeList} 
+              currentTab="popular" 
+              toggleFavorite={toggleFavorite}
+              toggleWatched={toggleWatched}
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
           } />
 
           <Route path="/favorite" element={
-            <Main data={animeList} currentTab="favorite" onToggleFavorite={toggleFavorite} />
+            <Main 
+              data={animeList} 
+              currentTab="favorite" 
+              toggleFavorite={toggleFavorite}
+              toggleWatched={toggleWatched}
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
           } />
 
           <Route path="/watched" element={
-            <Main data={animeList} currentTab="watched" onToggleFavorite={toggleFavorite} />
+            <Main 
+              data={animeList} 
+              currentTab="watched" 
+              toggleFavorite={toggleFavorite}
+              toggleWatched={toggleWatched}
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
           } />
 
           <Route path="/my-anime" element={
-            <Main data={animeList} currentTab="my-anime" onToggleFavorite={toggleFavorite} />
+            <Main 
+              data={animeList} 
+              currentTab="my-anime" 
+              toggleFavorite={toggleFavorite}
+              toggleWatched={toggleWatched}
+              onAddAnime={addAnime}
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
           } />
 
           <Route path="/about" element={<About />} />
-
           <Route path="/anime/:id" element={<AnimeDetails allAnime={animeList} />} />
-          
           <Route path="*" element={<NotFound />} />
         </Routes>
-      <Footer />
-    </div>
+        
+        <Footer />
+      </div>
     </ThemeProvider>
   );
 }
+
 export default App;

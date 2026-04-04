@@ -11,29 +11,15 @@
   color: var(--bg-color);
   padding: 40px 30px;
   border-radius: 16px;
-  box-shadow: var(--shadow);
 }
 
-.my-anime-header h2 {
-  font-size: 28px;
-  margin-bottom: 15px;
-}
-
-.my-anime-header p {
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--bg-color);
-  opacity: 0.9;
-  max-width: 700px;
-  margin: 0 auto;
-}
+.my-anime-header h2 { font-size: 28px; margin-bottom: 15px; }
 
 .add-anime-form-container {
   background-color: var(--card-bg);
   padding: 30px;
   border-radius: 16px;
   border: 1px solid var(--card-border);
-  box-shadow: var(--shadow);
   margin-bottom: 50px;
 }
 
@@ -53,6 +39,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  text-align: left;
 }
 
 .form-group label {
@@ -63,48 +50,49 @@
 
 .form-group input,
 .form-group select,
-.form-group textarea {
+.form-group textarea,
+.add-anime-form input {
+  width: 100%;
   padding: 12px 15px;
-  /* Рамка та фон полів вводу */
-  border: 1px solid var(--card-border);
-  background-color: var(--bg-color);
-  color: var(--text-primary);
-  border-radius: 8px;
+  border: 1px solid var(--card-border) !important;
+  background-color: var(--bg-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
   font-size: 14px;
-  font-family: inherit;
   transition: all 0.2s ease;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.form-group input:focus, 
+.form-group select:focus, 
+.form-group textarea:focus,
+.add-anime-form input:focus {
   outline: none;
-  border-color: var(--accent-color);
-  background-color: var(--card-bg);
+  border-color: var(--accent-color) !important;
+  background-color: var(--card-bg) !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .form-group textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
 }
 
-.submit-btn {
-  background-color: var(--accent-color);
-  color: white;
-  border: none;
-  padding: 14px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
+.submit-btn-custom {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+  border: none !important;
+  padding: 14px 24px !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
   cursor: pointer;
   transition: opacity 0.2s ease;
-  align-self: center;
-  width: 100%;
-  max-width: 300px;
-  margin-top: 10px;
+  width: 100% !important;
+  max-width: 300px !important;
+  margin: 20px auto 0 !important;
+  display: block;
 }
 
-.submit-btn:hover {
+.submit-btn-custom:hover {
   opacity: 0.9;
 }

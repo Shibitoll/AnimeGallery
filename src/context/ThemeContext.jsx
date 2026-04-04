@@ -1,19 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-//Створення контексту
+// 1. Створення контексту
 const ThemeContext = createContext();
 
-// Провайдер компонента
+// 2. Провайдер компонента
 export const ThemeProvider = ({ children }) => {
+  // Отримуємо збережену тему або використовуємо 'light' за замовчуванням
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('app-theme') || 'light';
   });
 
-  // Зберігаємо тему при кожній зміні та оновлюємо клас на body
-  useEffect(() => {
-    localStorage.setItem('app-theme', theme);
-    document.body.className = theme + '-theme';
-  }, [theme]);
+useEffect(() => {
+  localStorage.setItem('app-theme', theme);
+  document.documentElement.setAttribute('data-theme', theme);
+}, [theme]);
 
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
@@ -26,7 +26,8 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
-// Кастомний хук useTheme
+// 3. Кастомний хук useTheme
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
