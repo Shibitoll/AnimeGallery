@@ -11,61 +11,33 @@ import { ThemeProvider } from './context/ThemeContext';
 import './styles/App.css';
 
 function App() {
-  // Лінива ініціалізація (отримуємо дані з localStorage або використовуємо початкові)
   const [animeList, setAnimeList] = useState(() => {
     const savedData = localStorage.getItem('anime-data');
-    if (savedData) {
-      return JSON.parse(savedData); 
-    }
-    return initialAnimeList; 
+    return savedData ? JSON.parse(savedData) : initialAnimeList;
   });
 
-  const [currentTab, setCurrentTab] = useState('home');
-
-  // Збереження даних (при кожній зміні)
   useEffect(() => {
     localStorage.setItem('anime-data', JSON.stringify(animeList));
-  }, [animeList]); 
+  }, [animeList]);
 
-  // Функція для лайків
   const toggleFavorite = (id) => {
-    setAnimeList((prevList) => 
-      prevList.map((anime) => 
-        anime.id === id ? { ...anime, isFavorite: !anime.isFavorite } : anime
-      )
-    );
+    setAnimeList(prev => prev.map(a => a.id === id ? { ...a, isFavorite: !a.isFavorite } : a));
   };
 
-  // Функція для "Переглянуто"
   const toggleWatched = (id) => {
-    setAnimeList((prevList) => 
-      prevList.map((anime) => 
-        anime.id === id ? { ...anime, isWatched: !anime.isWatched } : anime
-      )
-    );
+    setAnimeList(prev => prev.map(a => a.id === id ? { ...a, isWatched: !a.isWatched } : a));
   };
 
-  // Функція для "Додавання аніме"
-  const addAnime = (newAnime) => {
-    setAnimeList((prevList) => [newAnime, ...prevList]);
-  };
+  const addAnime = (newAnime) => setAnimeList(prev => [newAnime, ...prev]);
 
-  // Функція для видалення власного аніме
   const deleteAnime = (id) => {
-    const isConfirmed = window.confirm("Ви впевнені, що хочете видалити це аніме зі своєї колекції? Цю дію неможливо буде скасувати.");
-
-    if (isConfirmed) {
-      setAnimeList((prevList) => prevList.filter((anime) => anime.id !== id));
-    };
+    if (window.confirm("Видалити це аніме?")) {
+      setAnimeList(prev => prev.filter(a => a.id !== id));
+    }
   };
 
-  // Функція для оновлення власної оцінки користувача 
   const updateRating = (id, newRating) => {
-    setAnimeList((prevList) => 
-      prevList.map((anime) => 
-        anime.id === id ? { ...anime, userRating: newRating } : anime
-      )
-    );
+    setAnimeList(prev => prev.map(a => a.id === id ? { ...a, userRating: newRating } : a));
   };
 
   return (
@@ -74,44 +46,71 @@ function App() {
         <Header 
           favoriteCount={animeList.filter(a => a.isFavorite).length} 
           watchedCount={animeList.filter(a => a.isWatched).length}
-          currentTab={currentTab} 
-          setCurrentTab={setCurrentTab} 
         />
-          <Routes>
-            <Route path="/" element={
-              <Main 
-                data={animeList} 
-                toggleFavorite={toggleFavorite} 
-                toggleWatched={toggleWatched}
-                currentTab={currentTab}
-                onAddAnime={addAnime}
-                onDeleteAnime={deleteAnime}
-                onUpdateRating={updateRating}
-              />
-            } />
+        
+        <Routes>
+          <Route path="/" element={
+            <Main 
+              data={animeList} 
+              currentTab="home"
+              toggleFavorite={toggleFavorite} 
+              toggleWatched={toggleWatched}
+              onAddAnime={addAnime}
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
+          } />
 
-            <Route path="/popular" element={
-              <Main data={animeList} currentTab="popular" onToggleFavorite={toggleFavorite} />
-            } />
+          <Route path="/popular" element={
+            <Main 
+              data={animeList} 
+              currentTab="popular" 
+              toggleFavorite={toggleFavorite}
+              toggleWatched={toggleWatched}
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
+          } />
 
-            <Route path="/favorite" element={
-              <Main data={animeList} currentTab="favorite" onToggleFavorite={toggleFavorite} />
-            } />
+          <Route path="/favorite" element={
+            <Main 
+              data={animeList} 
+              currentTab="favorite" 
+              toggleFavorite={toggleFavorite}
+              toggleWatched={toggleWatched}
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
+          } />
 
-            <Route path="/watched" element={
-              <Main data={animeList} currentTab="watched" onToggleFavorite={toggleFavorite} />
-            } />
+          <Route path="/watched" element={
+            <Main 
+              data={animeList} 
+              currentTab="watched" 
+              toggleFavorite={toggleFavorite}
+              toggleWatched={toggleWatched}
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
+          } />
 
-            <Route path="/my-anime" element={
-              <Main data={animeList} currentTab="my-anime" onToggleFavorite={toggleFavorite} />
-            } />
+          <Route path="/my-anime" element={
+            <Main 
+              data={animeList} 
+              currentTab="my-anime" 
+              toggleFavorite={toggleFavorite}
+              toggleWatched={toggleWatched}
+              onAddAnime={addAnime}
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
+          } />
 
-            <Route path="/about" element={<About />} />
-
-            <Route path="/anime/:id" element={<AnimeDetails allAnime={animeList} />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Route path="/about" element={<About />} />
+          <Route path="/anime/:id" element={<AnimeDetails allAnime={animeList} />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        
         <Footer />
       </div>
     </ThemeProvider>
