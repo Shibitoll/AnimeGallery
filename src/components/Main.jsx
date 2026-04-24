@@ -61,6 +61,24 @@ const interactedAnime = data.filter(anime =>
     ? (ratedAnime.reduce((sum, a) => sum + parseFloat(a.rating), 0) / ratedAnime.length).toFixed(1)
     : '0.0';
 
+/**
+   * Допоміжна функція для визначення діапазону років випуску.
+   * * @function getYearLimits
+   * @memberof Main
+   * @inner
+   * @param {Array<Object>} items - Масив аніме для аналізу.
+   * @returns {{oldest: (number|string), newest: (number|string)}} Об'єкт з межами років.
+   */
+  const getYearLimits = (items) => {
+    if (items.length === 0) return { oldest: '-', newest: '-' };
+    const years = items.map(a => parseInt(a.year)).filter(y => !isNaN(y));
+    return {
+      oldest: years.length > 0 ? Math.min(...years) : '-',
+      newest: years.length > 0 ? Math.max(...years) : '-'
+    };
+  };
+
+  
 /** * Об'єкт статистики для вкладки "Улюблені".
    * @typedef {Object} StatsObj
    * @property {number} count - Кількість елементів.
@@ -97,24 +115,6 @@ const watchedItems = data.filter(a => a.isWatched);
     totalEpisodes: watchedItems.reduce((sum, a) => sum + (parseInt(a.episodes) || 0), 0),
     oldest: watchedYears.oldest,
     newest: watchedYears.newest
-  };
-
-
-/**
-   * Допоміжна функція для визначення діапазону років випуску.
-   * * @function getYearLimits
-   * @memberof Main
-   * @inner
-   * @param {Array<Object>} items - Масив аніме для аналізу.
-   * @returns {{oldest: (number|string), newest: (number|string)}} Об'єкт з межами років.
-   */
-  const getYearLimits = (items) => {
-    if (items.length === 0) return { oldest: '-', newest: '-' };
-    const years = items.map(a => parseInt(a.year)).filter(y => !isNaN(y));
-    return {
-      oldest: years.length > 0 ? Math.min(...years) : '-',
-      newest: years.length > 0 ? Math.max(...years) : '-'
-    };
   };
 
   const favoriteAnime = favoriteItems;
