@@ -7,6 +7,7 @@ import About from './pages/About';
 import AnimeDetails from './pages/AnimeDetails';
 import NotFound from './pages/NotFound';
 import { ThemeProvider } from './context/ThemeContext';
+import Search from './pages/Search';
 import './styles/App.css';
 
 /**
@@ -24,15 +25,34 @@ function App() {
   /**
    * Завантажує список аніме з бекенду при першому рендері.
    */
+  /**
+   * Завантажує список аніме з бекенду при першому рендері.
+   * Проходить по всіх сторінках пагінації Django, щоб не загубити жодного тайтлу!
+   */
   useEffect(() => {
     const fetchAnime = async () => {
       try {
-        const response = await fetch(API_URL);
-        if (!response.ok) throw new Error('Помилка мережі');
-        const data = await response.json();
-        // Перевірка структури даних (DRF зазвичай повертає results)
-        const actualAnimeArray = data.results ? data.results : data;
-        setAnimeList(actualAnimeArray);
+        let allAnime = [];
+        let nextPageUrl = API_URL;
+
+        // Цикл працюватиме, поки Django повертає посилання "next"
+        while (nextPageUrl) {
+          const response = await fetch(nextPageUrl);
+          if (!response.ok) throw new Error('Помилка мережі');
+          
+          const data = await response.json();
+          
+          if (data.results) {
+            allAnime = [...allAnime, ...data.results];
+            nextPageUrl = data.next; // Беремо посилання на наступну сторінку
+          } else {
+            // Якщо пагінації раптом немає
+            allAnime = data;
+            nextPageUrl = null;
+          }
+        }
+        
+        setAnimeList(allAnime);
       } catch (error) {
         console.error("Не вдалося завантажити аніме:", error);
       } finally {
@@ -83,18 +103,49 @@ function App() {
   };
 
   /**
+   * Оновлює статус "В планах" через PATCH-запит.
+   */
+  const togglePlanned = async (id) => {
+    const anime = animeList.find(a => a.id === id);
+    try {
+      const response = await fetch(`${API_URL}${id}/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planned: !anime.planned }) // Відправляємо нове значення
+      });
+      if (response.ok) {
+        const updated = await response.json();
+        setAnimeList(prev => prev.map(a => a.id === id ? updated : a));
+      }
+    } catch (error) {
+      console.error("Помилка при оновленні статусу планів:", error);
+    }
+  };
+
+/**
    * Додає нове аніме через POST-запит.
    */
   const addAnime = async (newAnime) => {
+    const animeDataToSend = {
+      ...newAnime,
+      isAddedByUser: newAnime.isAddedByUser !== undefined ? newAnime.isAddedByUser : true
+    };
+    
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAnime)
+        body: JSON.stringify(animeDataToSend)
       });
+      
       if (response.ok) {
         const savedAnime = await response.json();
         setAnimeList(prev => [savedAnime, ...prev]);
+      } else {
+        // ДОДАНО: Якщо статус 400, читаємо детальну відповідь від Django
+        const errorData = await response.json();
+        console.error("❌ ДЖАНГО КАЖЕ, ЩО ПОМИЛКА ТУТ:", errorData);
+        alert("Помилка від бекенду! Відкрийте консоль (F12), щоб побачити деталі.");
       }
     } catch (error) {
       console.error("Помилка при додаванні:", error);
@@ -146,6 +197,7 @@ function App() {
         <Header 
           favoriteCount={animeList.filter(a => a.isFavorite).length} 
           watchedCount={animeList.filter(a => a.isWatched).length}
+          plannedCount={animeList.filter(a => a.planned).length} // Додано підрахунок запланованих
           currentTab={currentTab} 
           setCurrentTab={setCurrentTab} 
         />
@@ -157,6 +209,7 @@ function App() {
               currentTab="home"
               toggleFavorite={toggleFavorite} 
               toggleWatched={toggleWatched}
+              togglePlanned={togglePlanned}
               onAddAnime={addAnime}
               onDeleteAnime={deleteAnime}
               onUpdateRating={updateRating}
@@ -169,6 +222,21 @@ function App() {
               currentTab="popular" 
               toggleFavorite={toggleFavorite}
               toggleWatched={toggleWatched}
+              togglePlanned={togglePlanned}
+              onAddAnime={addAnime} /* ДОДАНО */
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
+          } />
+
+          <Route path="/new" element={
+            <Main 
+              data={animeList} 
+              currentTab="new" 
+              toggleFavorite={toggleFavorite}
+              toggleWatched={toggleWatched}
+              togglePlanned={togglePlanned}
+              onAddAnime={addAnime} /* ДОДАНО */
               onDeleteAnime={deleteAnime}
               onUpdateRating={updateRating}
             />
@@ -180,6 +248,8 @@ function App() {
               currentTab="favorite" 
               toggleFavorite={toggleFavorite}
               toggleWatched={toggleWatched}
+              togglePlanned={togglePlanned}
+              onAddAnime={addAnime}
               onDeleteAnime={deleteAnime}
               onUpdateRating={updateRating}
             />
@@ -191,6 +261,21 @@ function App() {
               currentTab="watched" 
               toggleFavorite={toggleFavorite}
               toggleWatched={toggleWatched}
+              togglePlanned={togglePlanned}
+              onAddAnime={addAnime}
+              onDeleteAnime={deleteAnime}
+              onUpdateRating={updateRating}
+            />
+          } />
+
+          <Route path="/planned" element={
+            <Main 
+              data={animeList} 
+              currentTab="planned" 
+              toggleFavorite={toggleFavorite}
+              toggleWatched={toggleWatched}
+              togglePlanned={togglePlanned}
+              onAddAnime={addAnime}
               onDeleteAnime={deleteAnime}
               onUpdateRating={updateRating}
             />
@@ -202,6 +287,7 @@ function App() {
               currentTab="my-anime" 
               toggleFavorite={toggleFavorite}
               toggleWatched={toggleWatched}
+              togglePlanned={togglePlanned}
               onAddAnime={addAnime}
               onDeleteAnime={deleteAnime}
               onUpdateRating={updateRating}
@@ -209,7 +295,29 @@ function App() {
           } />
 
           <Route path="/about" element={<About />} />
-          <Route path="/anime/:id" element={<AnimeDetails allAnime={animeList} />} />
+          
+          <Route path="/anime/:id" element={
+            <AnimeDetails 
+              data={animeList} 
+              onAddAnime={addAnime}
+              onToggleFavorite={toggleFavorite}
+              onToggleWatched={toggleWatched}
+              onTogglePlanned={togglePlanned}
+              onUpdateRating={updateRating}
+            />
+          } />
+
+          <Route path="/search" element={
+            <Search 
+              data={animeList} 
+              onAddAnime={addAnime}
+              onToggleFavorite={toggleFavorite}
+              onToggleWatched={toggleWatched}
+              onTogglePlanned={togglePlanned}
+              onUpdateRating={updateRating}
+            />
+          } />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
         

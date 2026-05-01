@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import AnimeCard from './AnimeCard';
 
-const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onTogglePlanned, onUpdateRating, isHomePage }) => {
-  const [topAnime, setTopAnime] = useState([]);
+const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onTogglePlanned, onUpdateRating, isHomePage }) => {
+  const [popular, setPopular] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
 
-  const [filters, setFilters] = useState({ type: '' });
+  // Фільтри, які йдуть на бекенд (щоб отримувати правильні сторінки)
+  const [filters, setFilters] = useState({ type: '', rating: '' });
   
   // ВИКЛЮЧНО ФРОНТЕНД-СОРТУВАННЯ
   const [localSort, setLocalSort] = useState('default');
 
   useEffect(() => {
-    const fetchTopAnime = async () => {
+    const fetchPopular = async () => {
       try {
         setIsLoading(true);
-        let apiUrl = `http://localhost:8000/api/streaming/top-airing/?page=${page}`;
+        let apiUrl = `http://localhost:8000/api/streaming/popular/?page=${page}`;
         if (filters.type) apiUrl += `&type=${filters.type}`;
+        if (filters.rating) apiUrl += `&rating=${filters.rating}`;
 
         const response = await fetch(apiUrl);
         const result = await response.json();
@@ -29,14 +30,14 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
         setTotalPages(result.totalPages || 1);
 
         const uniqueAnime = Array.from(new Map(animeList.map(item => [item.id, item])).values());
-        setTopAnime(uniqueAnime);
+        setPopular(uniqueAnime); 
       } catch (err) {
-        console.error("Помилка завантаження новинок:", err);
+        console.error("Помилка завантаження популярних:", err);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchTopAnime();
+    fetchPopular();
   }, [page, filters]);
 
   const handlePageChange = (newPage) => {
@@ -67,7 +68,7 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
         return sorted.sort((a, b) => parseFloat(a.rating || 0) - parseFloat(b.rating || 0));
       case 'year_desc':
         return sorted.sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
-      case 'year_asc':
+      case 'year_asc': // Якщо року немає, кидаємо в кінець (9999)
         return sorted.sort((a, b) => (parseInt(a.year) || 9999) - (parseInt(b.year) || 9999));
       case 'episodes_desc':
         return sorted.sort((a, b) => (parseInt(b.episodes) || 0) - (parseInt(a.episodes) || 0));
@@ -78,25 +79,26 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
           return epA - epB;
         });
       default:
-        return sorted; 
+        return sorted; // 'default' — зберігаємо порядок, як віддав API
     }
   };
 
-  const baseAnimeList = isHomePage ? topAnime.slice(0, 10) : topAnime;
+  const baseAnimeList = isHomePage ? popular.slice(0, 10) : popular;
   const finalDisplayedAnime = getSortedAnime(baseAnimeList);
 
   return (
-    <section className="api-section">
+    <div className="api-section">
+      
       {!isHomePage && (
         <div className="section-header">
           <h2 className="gallery-title" style={{ marginTop: 'var(--space-lg)', color: 'var(--text-primary)' }}>
-            Новинки цього сезону (Онлайн)
+            Найпопулярніші аніме у світі
           </h2>
-          
+
           <div className="filters-container" style={{ marginBottom: '30px', justifyContent: 'flex-start' }}>
             <div className="filter-group">
               <label>Формат випуску</label>
-              <select value={filters.type} onChange={(e) => { setFilters({ type: e.target.value }); setPage(1); }}>
+              <select value={filters.type} onChange={(e) => { setFilters({...filters, type: e.target.value}); setPage(1); }}>
                 <option value="">Усі формати</option>
                 <option value="tv">TV-серіал (ТБ)</option>
                 <option value="movie">Повнометражний фільм</option>
@@ -104,11 +106,21 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
               </select>
             </div>
 
+            <div className="filter-group">
+              <label>Вікова категорія</label>
+              <select value={filters.rating} onChange={(e) => { setFilters({...filters, rating: e.target.value}); setPage(1); }}>
+                <option value="">Для будь-якого віку</option>
+                <option value="g">G (Усі вікові категорії)</option>
+                <option value="pg13">PG-13 (Для підлітків)</option>
+                <option value="r17">R-17 (Дорослі теми)</option>
+              </select>
+            </div>
+
             {/* МЕНЮ ФРОНТЕНД-СОРТУВАННЯ */}
             <div className="filter-group">
               <label>Відсортувати</label>
               <select value={localSort} onChange={(e) => setLocalSort(e.target.value)} style={{ borderLeft: '3px solid var(--neon-accent)' }}>
-                <option value="default">Тренд MAL (Оригінал)</option>
+                <option value="default">ТОП MAL (Оригінал)</option>
                 <optgroup label="За оцінкою">
                   <option value="rating_desc">Найкращі зверху (★)</option>
                   <option value="rating_asc">Найгірші зверху</option>
@@ -127,18 +139,18 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
                 </optgroup>
               </select>
             </div>
-            
-            {(filters.type || localSort !== 'default') && (
-              <button className="reset-filters-btn" onClick={() => { setFilters({ type: '' }); setLocalSort('default'); setPage(1); }}>
+
+            {(filters.type || filters.rating || localSort !== 'default') && (
+              <button className="reset-filters-btn" onClick={() => { setFilters({ type: '', rating: '' }); setLocalSort('default'); setPage(1); }}>
                 ✕ Скинути
               </button>
             )}
           </div>
         </div>
       )}
-      
+
       {isLoading ? (
-         <div className="loading-spinner" style={{ margin: '40px auto' }}></div>
+        <div className="loading-spinner" style={{ margin: '40px auto' }}></div>
       ) : (
         <div className="anime-grid">
           {finalDisplayedAnime.map((anime) => {
@@ -161,9 +173,9 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
                   description: anime.description || "Опис доступний на сторінці перегляду.",
                   year: String(anime.year || new Date().getFullYear()),
                   episodes: String(anime.episodes || 0),
-                  studio: Array.isArray(anime.studio) ? anime.studio.join(', ') : (anime.studio || 'Онгоїнг'),
+                  studio: Array.isArray(anime.studio) ? anime.studio.join(', ') : (anime.studio || 'Популярне'),
                   status: anime.status || 'Unknown',
-                  genres: anime.genres?.length > 0 ? anime.genres.join(', ') : 'Новинка',
+                  genres: anime.genres?.length > 0 ? anime.genres.join(', ') : 'Популярне',
                   isFavorite: actionType === 'favorite',
                   isWatched: actionType === 'watched',
                   planned: actionType === 'planned', 
@@ -176,7 +188,7 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
 
             return (
               <AnimeCard 
-                key={`top-${animeId}`}
+                key={`pop-${animeId}`}
                 id={localAnime ? localAnime.id : animeId}
                 mal_id={animeId}
                 title={title}
@@ -185,8 +197,8 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
                 description={''}
                 year={anime.year || 'N/A'}
                 episodes={anime.episodes || 0}
-                studio={anime.studio || 'Онгоїнг'}
-                genres={anime.genres?.length > 0 ? anime.genres.join(', ') : 'Різне'}
+                studio={anime.studio || 'Популярне'}
+                genres={anime.genres?.length > 0 ? anime.genres.join(', ') : 'Популярне'}
                 isFavorite={localAnime ? localAnime.isFavorite : false} 
                 isWatched={localAnime ? localAnime.isWatched : false}
                 planned={localAnime ? localAnime.planned : false}
@@ -215,8 +227,8 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
           <button className="page-btn" disabled={page === totalPages || !hasNextPage} onClick={() => handlePageChange(totalPages)} title="Остання">&raquo;</button>
         </div>
       )}
-    </section>
+    </div>
   );
 };
 
-export default TopAnimeList;
+export default PopularAnimeList;

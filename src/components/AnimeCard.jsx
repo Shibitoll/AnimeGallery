@@ -1,155 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Button, Input } from './ui';
 
-/**
- * Компонент картки окремого аніме.
- * Відображає детальну інформацію про тайтл, дозволяє змінювати статуси
- * (улюблене, переглянуто), видаляти додані користувачем записи та редагувати персональну оцінку.
- * * @component
- * @param {Object} props - Властивості компонента.
- * @param {number} props.id - Унікальний ідентифікатор аніме.
- * @param {string} props.title - Назва аніме.
- * @param {string} props.poster - URL зображення постера.
- * @param {number|string} props.rating - Загальний рейтинг аніме.
- * @param {number|string} props.userRating - Персональна оцінка користувача.
- * @param {string} props.description - Короткий опис сюжету.
- * @param {string} props.year - Рік випуску.
- * @param {string|number} props.episodes - Кількість епізодів.
- * @param {string} props.studio - Студія виробництва.
- * @param {string} props.genres - Жанри аніме.
- * @param {boolean} props.isFavorite - Чи додано аніме в улюблені.
- * @param {boolean} props.isWatched - Чи позначено аніме як переглянуте.
- * @param {Function} props.onToggleFavorite - Функція для зміни статусу "улюблене".
- * @param {Function} props.onToggleWatched - Функція для зміни статусу "переглянуто".
- * @param {boolean} props.isAddedByUser - Чи було аніме додане користувачем вручну.
- * @param {Function} props.onDeleteAnime - Функція для видалення аніме.
- * @param {Function} props.onUpdateRating - Функція для оновлення персональної оцінки.
- */
 const AnimeCard = ({ 
-  id, title, poster, rating, userRating, description, year, episodes, 
+  id, mal_id, title, poster, rating, userRating, year, episodes, 
   studio, genres, isFavorite, isWatched, onToggleFavorite, 
   onToggleWatched, isAddedByUser, onDeleteAnime, onUpdateRating 
 }) => {
   
-  /** * Форматований рейтинг для відображення (завжди один знак після коми).
-   * Використовуємо parseFloat для коректної обробки рядків з БД.
-   */
   const displayUserRating = userRating ? parseFloat(userRating).toFixed(1) : '0.0';
+  const displayGenres = Array.isArray(genres) ? genres.join(', ') : genres;
   
   const [isEditing, setIsEditing] = useState(false);
   const [tempRating, setTempRating] = useState(displayUserRating);
   
-  // Логіка синхронізації: якщо рейтинг змінився зовні (наприклад, через API), 
-  // оновлюємо локальний стан редагування
-  const [prevRating, setPrevRating] = useState(displayUserRating);
-  if (displayUserRating !== prevRating) {
-    setPrevRating(displayUserRating);
+  useEffect(() => {
     setTempRating(displayUserRating);
-  }
+  }, [displayUserRating]);
 
-  /**
-   * Обробник збереження нової оцінки.
-   * Валідує введене число (0-10) та викликає функцію оновлення.
-   */
   const handleSave = () => {
     const numRating = parseFloat(tempRating);
-    if (isNaN(numRating) || numRating < 0 || numRating > 10) {
-      alert("Будь ласка, введіть число від 0 до 10");
-      return;
-    }
+    if (isNaN(numRating) || numRating < 0 || numRating > 10) return;
     onUpdateRating(id, numRating.toFixed(1));
     setIsEditing(false);
   };
   
+  const handlePrefetch = () => {
+    fetch(`http://localhost:8000/api/streaming/info/${id}/`).catch(() => {});
+  };
+
   return (
-    <Card className={isWatched ? 'watched-card' : ''}>
-      <div className="poster-wrapper">
-        <img src={poster} alt={title} className="card-image" />
-        <span className="rating-badge" title="Загальний рейтинг">★ {rating}</span>
+    <Card 
+      className={`anime-card-modern compact ${isWatched ? 'watched' : ''}`}
+      onMouseEnter={handlePrefetch}
+    >
+      <div className="poster-container">
+        <Link to={`/anime/${mal_id || id}`} className="poster-link">
+          <img src={poster} alt={title} className="poster-image" loading="lazy" />
+          <div className="poster-overlay"><span className="play-icon">▶</span></div>
+        </Link>
+        
+        {rating && parseFloat(rating) > 0 && (
+          <span className="global-rating">★ {parseFloat(rating).toFixed(1)}</span>
+        )}
       
         <button 
-          className={`favorite-btn ${isFavorite ? 'active' : ''}`}
+          className={`action-icon-btn favorite ${isFavorite ? 'active' : ''}`}
           onClick={(e) => {
-            e.preventDefault(); 
-            onToggleFavorite(id);
+            e.preventDefault(); e.stopPropagation(); onToggleFavorite(id);
           }}
-          title={isFavorite ? "Прибрати з улюблених" : "Додати в улюблені"}
-          aria-label="Додати до улюблених"
         >
-          {isFavorite ? '❤️' : '♡'}
+          {isFavorite ? '❤️' : '🤍'}
         </button>
 
         {isAddedByUser && (
-          <button 
-            className="delete-btn" 
-            onClick={() => onDeleteAnime(id)}
-            title="Видалити аніме"
-          >
-            🗑️
-          </button>
+          <button className="action-icon-btn delete" onClick={(e) => {
+            e.preventDefault(); e.stopPropagation(); onDeleteAnime(id);
+          }}>🗑️</button>
         )}
       </div>
 
-      <div className="card-content">
-        <h3 className="card-title">{title}</h3>
-        <p className="card-desc">{description}</p>
+      <div className="card-info compact-info">
+        <Link to={`/anime/${mal_id || id}`} className="title-link">
+          <h3 className="anime-title" title={title}>{title}</h3>
+        </Link>
         
-        <div className="genres-list">
-          <span className="genre-tag">{genres}</span>
+        <div className="meta-tags">
+          {year && year !== '-' && <span className="meta-tag">{year}</span>}
+          {episodes > 0 && <span className="meta-tag">{episodes} сер.</span>}
         </div>
 
-        <div className="card-footer-info">
-          <span>{year}</span>
-          <span>{episodes} сер.</span>
-          <span>{studio}</span>
-        </div>
+        {displayGenres && <span className="genre-text compact-genre">{displayGenres}</span>}
 
-        <Button 
-          variant={isWatched ? 'primary' : 'secondary'} 
-          onClick={() => onToggleWatched(id)}
-          className={`watch-status-btn ${isWatched ? 'is-watched' : ''}`}
-          style={{ width: '100%', marginTop: '10px' }}
-        >
-          {isWatched ? '✅ Переглянуто' : '👁️ Буду дивитись'}
-        </Button>
-
-        <div className="user-rating-section">
-          <p>Ваша оцінка: 
-            {isEditing ? (
-              <Input 
-                type="number" 
-                step="0.1" 
-                min="0"
-                max="10"
-                value={tempRating} 
-                onChange={(e) => setTempRating(e.target.value)}
-                style={{ width: '70px', display: 'inline-block', marginLeft: '10px' }}
-                autoFocus
-              />
-            ) : (
-              <strong className="user-score"> {displayUserRating}</strong>
-            )}
-          </p>
-          
+        <div className="card-actions compact-actions">
           <Button 
-            variant="secondary" 
-            className={isEditing ? 'saving' : ''}
-            onClick={isEditing ? handleSave : () => setIsEditing(true)}
-            style={{ width: '100%', marginTop: '5px' }}
+            variant={isWatched ? 'primary' : 'outline'} 
+            onClick={() => onToggleWatched(id)}
+            className={`full-width-btn ${isWatched ? 'watched-btn' : ''}`}
           >
-            {isEditing ? '💾 Зберегти' : '✎ Змінити оцінку'}
+            {isWatched ? '✅' : '👁️ Буду дивитись'}
           </Button>
 
-          <Link to={`/anime/${id}`} style={{ textDecoration: 'none', display: 'block', marginTop: '10px' }}>
-            <Button 
-              variant="secondary" 
-              className="details-link-btn"
-              style={{ width: '100%' }}
-            >
-              Детальніше →
-            </Button>
-          </Link>
+          <div className="user-rating-box compact-rating">
+            {isEditing ? (
+              <div className="edit-rating-wrapper">
+                <Input type="number" step="0.1" min="0" max="10" value={tempRating} onChange={(e) => setTempRating(e.target.value)} className="rating-input" autoFocus />
+                <Button variant="primary" className="save-btn small" onClick={handleSave}>💾</Button>
+              </div>
+            ) : (
+              <div className="display-rating-wrapper" onClick={() => setIsEditing(true)}>
+                <span>Моя оцінка: </span>
+                <strong className={`user-score ${parseFloat(displayUserRating) > 0 ? 'rated' : ''}`}>
+                  {displayUserRating}
+                </strong>
+                <span className="edit-hint">✎</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Card>

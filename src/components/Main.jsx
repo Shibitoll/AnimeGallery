@@ -2,55 +2,28 @@ import React from 'react';
 import AnimeList from './AnimeList';
 import AddAnimeForm from './AddAnimeForm';
 import TopAnimeList from './TopAnimeList';
+import PopularAnimeList from './PopularAnimeList';
 import { Card } from './ui';
 
 /**
  * Головний контентний компонент (Main).
- * * Відповідає за:
- * 1. Розрахунок глобальної та категоріальної статистики (середні рейтинги, лічильники епізодів).
- * 2. Фільтрацію загального масиву даних за вкладками (Home, Popular, Favorite, Watched, My Anime).
- * 3. Рендеринг відповідних секцій та списків аніме.
- * * @component
- * @param {Object} props - Властивості компонента.
- * @param {Array<Object>} props.data - Повний масив об'єктів аніме з бази даних.
- * @param {Function} props.toggleFavorite - Обробник зміни статусу "улюблене".
- * @param {Function} props.toggleWatched - Обробник зміни статусу "переглянуто".
- * @param {string} props.currentTab - ID активної вкладки для перемикання контенту.
- * @param {Function} props.onAddAnime - Функція для створення нового запису аніме.
- * @param {Function} props.onDeleteAnime - Функція для видалення запису.
- * @param {Function} props.onUpdateRating - Функція для оновлення оцінки користувача.
  */
-const Main = ({data, toggleFavorite, toggleWatched, currentTab, onAddAnime, onDeleteAnime, onUpdateRating }) => {
+const Main = ({data, toggleFavorite, toggleWatched, togglePlanned, currentTab, onAddAnime, onDeleteAnime, onUpdateRating }) => {
   
-
-if (!data || data.length === 0) {
-    return (
-      <main className="main-content">
-        <p>Завантаження даних або список порожній...</p>
-      </main>
-    );
-  }
-  
-/** * @type {Array<Object>} interactedAnime - Аніме, з якими користувач взаємодіяв 
-   * (лайкнув, подивився або оцінив).
-   */
-const interactedAnime = data.filter(anime => 
+  // Аніме, з якими користувач взаємодіяв
+  const interactedAnime = data.filter(anime => 
     anime.isFavorite || 
     anime.isWatched || 
+    anime.planned ||
     anime.isAddedByUser || 
     (anime.userRating && anime.userRating !== '0.0')
   );
 
-/** @type {number} totalInteracted - Загальна кількість взаємодій користувача з тайтлами */
   const totalInteracted = interactedAnime.length;
-/** @type {number} favoritesCount - Кількість аніме в списку улюблених */
   const favoritesCount = data.filter(a => a.isFavorite).length;
-/** @type {number} watchedCount - Кількість аніме, відмічених як переглянуті */
   const watchedCount = data.filter(a => a.isWatched).length;
+  const plannedCount = data.filter(a => a.planned).length;
 
-
-/** * @type {Array} ratedAnime - Список аніме, яким користувач виставив власну оцінку.
-   */
   const ratedAnime = data.filter(a => a.userRating && a.userRating !== '0.0');
 
   const avgUserRating = ratedAnime.length > 0 
@@ -61,14 +34,6 @@ const interactedAnime = data.filter(anime =>
     ? (ratedAnime.reduce((sum, a) => sum + parseFloat(a.rating), 0) / ratedAnime.length).toFixed(1)
     : '0.0';
 
-/**
-   * Допоміжна функція для визначення діапазону років випуску.
-   * * @function getYearLimits
-   * @memberof Main
-   * @inner
-   * @param {Array<Object>} items - Масив аніме для аналізу.
-   * @returns {{oldest: (number|string), newest: (number|string)}} Об'єкт з межами років.
-   */
   const getYearLimits = (items) => {
     if (items.length === 0) return { oldest: '-', newest: '-' };
     const years = items.map(a => parseInt(a.year)).filter(y => !isNaN(y));
@@ -78,19 +43,8 @@ const interactedAnime = data.filter(anime =>
     };
   };
 
-  
-/** * Об'єкт статистики для вкладки "Улюблені".
-   * @typedef {Object} StatsObj
-   * @property {number} count - Кількість елементів.
-   * @property {string} userAvg - Середня оцінка користувача.
-   * @property {string} globalAvg - Середня оцінка системи.
-   * @property {number} totalEpisodes - Сума епізодів усіх тайтлів секції.
-   * @property {number|string} newest - Рік випуску найновішого тайтла.
-   * @property {number|string} oldest - Рік випуску найстарішого тайтла.
-   */
-
-/** @type {StatsObj} favStats - Статистика для обраних аніме. */
-const favoriteItems = data.filter(a => a.isFavorite);
+  // --- СТАТИСТИКА УЛЮБЛЕНИХ ---
+  const favoriteItems = data.filter(a => a.isFavorite);
   const favoriteRated = favoriteItems.filter(a => a.userRating && a.userRating !== '0.0');
   const favYears = getYearLimits(favoriteItems);
   
@@ -103,8 +57,8 @@ const favoriteItems = data.filter(a => a.isFavorite);
     newest: favYears.newest
   };
 
-  /** @type {StatsObj} watchedStats - Статистика для переглянутих аніме. */
-const watchedItems = data.filter(a => a.isWatched);
+  // --- СТАТИСТИКА ПЕРЕГЛЯНУТИХ ---
+  const watchedItems = data.filter(a => a.isWatched);
   const watchedRated = watchedItems.filter(a => a.userRating && a.userRating !== '0.0');
   const watchedYears = getYearLimits(watchedItems);
 
@@ -117,10 +71,35 @@ const watchedItems = data.filter(a => a.isWatched);
     newest: watchedYears.newest
   };
 
+  // --- СТАТИСТИКА ЗАПЛАНОВАНИХ ---
+  const plannedItems = data.filter(a => a.planned);
+  const plannedRated = plannedItems.filter(a => a.userRating && a.userRating !== '0.0');
+  const plannedYears = getYearLimits(plannedItems);
+
+  const plannedStats = {
+    count: plannedItems.length,
+    userAvg: plannedRated.length > 0 ? (plannedRated.reduce((sum, a) => sum + parseFloat(a.userRating), 0) / plannedRated.length).toFixed(1) : '0.0',
+    globalAvg: plannedRated.length > 0 ? (plannedRated.reduce((sum, a) => sum + parseFloat(a.rating), 0) / plannedRated.length).toFixed(1) : '0.0',
+    totalEpisodes: plannedItems.reduce((sum, a) => sum + (parseInt(a.episodes) || 0), 0),
+    oldest: plannedYears.oldest,
+    newest: plannedYears.newest
+  };
+
   const favoriteAnime = favoriteItems;
   const watchedAnime = watchedItems;
+  const plannedAnime = plannedItems;
+  
   const myAnimeList = data.filter(anime => anime.isAddedByUser);
-  const popularAnime = data.filter(anime => !anime.isAddedByUser);
+
+  // Спільні пропси для API-компонентів
+  const apiProps = {
+    data,
+    onAddAnime,
+    onToggleFavorite: toggleFavorite,
+    onToggleWatched: toggleWatched,
+    onTogglePlanned: togglePlanned,
+    onUpdateRating
+  };
 
   return (
     <main className="main-content">
@@ -183,15 +162,23 @@ const watchedItems = data.filter(a => a.isWatched);
             </Card>
           </section>
 
-          <h2 className="gallery-title">Популярні <span className="title-badge">Рейтинг 8.5+</span></h2>
-          <AnimeList list={popularAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating} />
+          <h2 className="gallery-title">Популярні в світі <span className="title-badge">Топ-10</span></h2>
+          <PopularAnimeList {...apiProps} isHomePage={true} />
 
-          <TopAnimeList />
+          <h2 className="gallery-title">Новинки сезону</h2>
+          <TopAnimeList {...apiProps} isHomePage={true} />
 
           {myAnimeList.length > 0 && (
             <div className="category-section">
               <h2 className="gallery-title">Мої додані аніме <span className="title-badge" style={{ backgroundColor: '#10b981', color: '#fff' }}>{myAnimeList.length}</span></h2>
-              <AnimeList list={myAnimeList} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating} />
+              <AnimeList 
+                list={myAnimeList.slice(0, 10)} 
+                onToggleFavorite={toggleFavorite} 
+                onToggleWatched={toggleWatched} 
+                onTogglePlanned={togglePlanned} 
+                onDeleteAnime={onDeleteAnime} 
+                onUpdateRating={onUpdateRating} 
+              />
             </div>
           )}
         </>
@@ -200,12 +187,11 @@ const watchedItems = data.filter(a => a.isWatched);
       {/* 2. СТОРІНКА ПОПУЛЯРНИХ */}
       {currentTab === 'popular' && (
         <>
-          <h2 className="gallery-title">Усі популярні аніме <span className="title-badge">{data.length}</span></h2>
-          <AnimeList list={popularAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating} />
+          <PopularAnimeList {...apiProps} />
         </>
       )}
 
-      {/* 3. СТОРІНКА УЛЮБЛЕНИХ */}
+      {/* 3. СТОРІНКА УЛЮБЛЕНИХ (З ПОВНОЮ СТАТИСТИКОЮ) */}
       {currentTab === 'favorite' && (
         <>
           <h2 className="gallery-title">Ваші улюблені аніме <span className="title-badge">{favoriteAnime.length}</span></h2>
@@ -266,14 +252,14 @@ const watchedItems = data.filter(a => a.isWatched);
           </section>
 
           {favoriteAnime.length > 0 ? (
-            <AnimeList list={favoriteAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating} />
+            <AnimeList list={favoriteAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onTogglePlanned={togglePlanned} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating} />
           ) : (
             <p className="empty-message">Список порожній. Додайте щось у серденько!</p>
           )}
         </>
       )}
 
-      {/* 4. СТОРІНКА ПЕРЕГЛЯНУТИХ */}
+      {/* 4. СТОРІНКА ПЕРЕГЛЯНУТИХ (З ПОВНОЮ СТАТИСТИКОЮ) */}
       {currentTab === 'watched' && (
         <>
           <h2 className="gallery-title">Переглянуті аніме <span className="title-badge">{watchedAnime.length}</span></h2>
@@ -334,13 +320,76 @@ const watchedItems = data.filter(a => a.isWatched);
           </section>
 
           {watchedAnime.length > 0 ? (
-            <AnimeList list={watchedAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating} />
+            <AnimeList list={watchedAnime} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onTogglePlanned={togglePlanned} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating} />
           ) : (
             <p className="empty-message">Ви ще нічого не переглянули повністю.</p>
           )}
         </>
       )}
 
+      {/* 5. СТОРІНКА В ПЛАНАХ (НОВА ВКАЛДКА) */}
+      {currentTab === 'planned' && (
+        <>
+          <h2 className="gallery-title">Планую подивитись <span className="title-badge" style={{backgroundColor: 'var(--neon-accent, #3b82f6)'}}>{plannedItems.length}</span></h2>
+
+          <section className="dashboard-stats">
+            <Card className="stat-card">
+              <div className="stat-info">
+                <h4>В планах</h4>
+                <span className="stat-value">{plannedStats.count}</span>
+                <p className="stat-desc">Чекають на перегляд</p>
+              </div>
+              <div className="stat-icon">📅</div>
+            </Card>
+
+            <Card className="stat-card">
+              <div className="stat-info" style={{ width: '100%' }}>
+                <h4>Очікувана якість (Оцінка Системи)</h4>
+                <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                  <div>
+                    <span className="stat-value" style={{ fontSize: '22px', color: '#64748b', margin: 0 }}>★ {plannedStats.globalAvg}</span>
+                    <p className="stat-desc">Середній рейтинг MAL</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="stat-card">
+              <div className="stat-info">
+                <h4>Попереду епізодів</h4>
+                <span className="stat-value">{plannedStats.totalEpisodes}</span>
+                <p className="stat-desc">Годин насолоди</p>
+              </div>
+              <div className="stat-icon">🍿</div>
+            </Card>
+
+            <Card className="stat-card">
+              <div className="stat-info" style={{ width: '100%' }}>
+                <h4>Часові межі списку</h4>
+                <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                  <div>
+                    <span className="stat-value" style={{ margin: '0', fontSize: '24px', color: '#64748b' }}>{plannedStats.oldest}</span>
+                    <p className="stat-desc">Найстаріше</p>
+                  </div>
+                  <div style={{ width: '1px', background: '#e2e8f0' }}></div>
+                  <div>
+                    <span className="stat-value" style={{ margin: '0', fontSize: '24px', color: '#6366f1' }}>{plannedStats.newest}</span>
+                    <p className="stat-desc">Найновіше</p>
+                  </div>
+                </div>
+              </div>
+              <div className="stat-icon">🕰️</div>
+            </Card>
+          </section>
+
+          {plannedItems.length > 0 ? (
+            <AnimeList list={plannedItems} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onTogglePlanned={togglePlanned} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating} />
+          ) : (
+            <p className="empty-message">Ваш список планів порожній. Знайдіть щось цікаве в каталозі!</p>
+          )}
+        </>
+      )}
+      
       {/* 5. СТОРІНКА МОЇ АНІМЕ */}
       {currentTab === 'my-anime' && (
         <div className="my-anime-page">
@@ -354,10 +403,16 @@ const watchedItems = data.filter(a => a.isWatched);
           {myAnimeList.length > 0 && (
             <div className="category-section" style={{ marginTop: '40px' }}>
               <h2 className="gallery-title">Додані вами аніме</h2>
-              <AnimeList list={myAnimeList} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating} />
+              <AnimeList list={myAnimeList} onToggleFavorite={toggleFavorite} onToggleWatched={toggleWatched} onTogglePlanned={togglePlanned} onDeleteAnime={onDeleteAnime} onUpdateRating={onUpdateRating} />
             </div>
           )}
         </div>
+      )}
+
+      {currentTab === 'new' && (
+        <>
+          <TopAnimeList {...apiProps} />
+        </>
       )}
 
     </main>
