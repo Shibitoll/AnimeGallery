@@ -5,9 +5,11 @@
 та їхнього зв'язку із користувачами (користувацькі списки, оцінки тощо).
 """
 import logging
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 logger = logging.getLogger('anime_api')
 
@@ -25,6 +27,9 @@ class Anime(models.Model):
     # ДОДАНО db_index=True для швидкого пошуку за назвою
     title = models.CharField(max_length=255, verbose_name="Назва", db_index=True)
     """str: Офіційна назва аніме."""
+    
+    mal_id = models.CharField(max_length=50, blank=True, null=True, verbose_name="ID з Jikan API")
+    """str: Оригінальний ідентифікатор аніме з MyAnimeList."""
     
     description = models.TextField(verbose_name="Опис")
     """str: Детальний опис сюжету."""
@@ -72,6 +77,9 @@ class Anime(models.Model):
     
     in_watchlist = models.BooleanField(default=False, verbose_name="Переглянуто")
     """bool: Прапорець, що вказує, чи додав користувач аніме до списку переглянутих."""
+
+    planned = models.BooleanField(default=False, verbose_name="Планую подивитись")
+    """bool: Вказує, чи планує користувач подивитися це аніме у майбутньому."""
     
     # Зв'язок з користувачем (ER: User <-> Anime)
     owner = models.ForeignKey(
@@ -140,3 +148,28 @@ class Anime(models.Model):
                 exc_info=True
             )
             raise e
+        
+class AnimeCache(models.Model):
+    """
+    Модель для тимчасового зберігання (кешування) результатів пошуку з API.
+    Це дозволяє не робити повторні запити до зовнішнього сервера Consumet.
+    """
+    # Текстовий ID (slug) аніме, наприклад "spy-x-family"
+    anime_id = models.CharField(max_length=255, unique=True, primary_key=True)
+    
+    # Поле для зберігання всього JSON-об'єкта від API
+    data = models.JSONField(verbose_name="Дані з API")
+    
+    # Автоматичне встановлення дати при створенні/оновленні
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def is_stale(self):
+        """Перевіряє, чи дані застаріли (старші за 24 години)."""
+        return timezone.now() - self.updated_at > timedelta(hours=24)
+
+    def __str__(self):
+        return f"Кеш для {self.anime_id} (оновлено: {self.updated_at})"
+
+    class Meta:
+        verbose_name = "Кеш аніме"
+        verbose_name_plural = "Кеш аніме"

@@ -42,7 +42,8 @@ class AnimeSerializer(serializers.ModelSerializer):
         """
         model = Anime
         fields = [
-            'id', 'title', 'rating', 'userRating', 'poster', 
+            'id', 'mal_id', 'title', 'rating', 'userRating', 'poster', 
             'description', 'genres', 'year', 'episodes', 
-            'studio', 'status', 'isFavorite', 'isWatched', 'isAddedByUser'
+            'studio', 'status', 'isFavorite', 'isWatched', 'isAddedByUser',
+            'planned'
         ]

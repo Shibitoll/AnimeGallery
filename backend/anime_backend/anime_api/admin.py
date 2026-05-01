@@ -6,7 +6,7 @@
 """
 from django.contrib import admin
 
-from .models import Anime
+from .models import Anime, AnimeCache
 
 
 @admin.register(Anime)
@@ -25,3 +25,9 @@ class AnimeAdmin(admin.ModelAdmin):
     """tuple: Поля, за якими працює рядок текстового пошуку."""
     list_editable = ('is_favorite', 'in_watchlist')
     """tuple: Поля, які дозволено змінювати прямо з таблиці (без переходу в картку)."""    
+
+@admin.register(AnimeCache)
+class AnimeCacheAdmin(admin.ModelAdmin):
+    list_display = ('anime_id', 'updated_at')
+    search_fields = ('anime_id',)
+    readonly_fields = ('updated_at',)
