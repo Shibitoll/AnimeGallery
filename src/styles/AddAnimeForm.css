@@ -1,98 +1,219 @@
-.my-anime-page {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.my-anime-header {
-  text-align: center;
-  margin-bottom: 40px;
-  background: linear-gradient(135deg, var(--text-primary) 0%, var(--card-border) 100%);
-  color: var(--bg-color);
-  padding: 40px 30px;
-  border-radius: 16px;
-}
-
-.my-anime-header h2 { font-size: 28px; margin-bottom: 15px; }
+/* src/styles/AddAnimeForm.css */
 
 .add-anime-form-container {
-  background-color: var(--card-bg);
-  padding: 30px;
-  border-radius: 16px;
-  border: 1px solid var(--card-border);
+  background: var(--surface-card, #1e293b);
+  padding: 40px;
+  border-radius: 24px;
+  border: 1px solid var(--border-light, rgba(255,255,255,0.05));
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
   margin-bottom: 50px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.5s ease-out;
 }
 
-.add-anime-form {
+/* Декоративний градієнт на фоні */
+.add-anime-form-container::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.form-header-badge {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.form-main-title {
+  font-size: 32px;
+  margin: 0 0 10px 0;
+  color: var(--text-main, #fff);
+  position: relative;
+  z-index: 1;
+}
+
+.form-subtitle {
+  color: var(--text-muted, #94a3b8);
+  margin: 0 0 30px 0;
+  font-size: 15px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 1;
+}
+
+.modern-anime-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
 }
 
-.form-grid {
+.modern-form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  text-align: left;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
 }
 
 .form-group label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-muted, #94a3b8);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea,
-.add-anime-form input {
+.form-group label .required {
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+/* ІНПУТИ ТА ІКОНКИ */
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  font-size: 18px;
+  color: var(--text-muted, #94a3b8);
+  pointer-events: none;
+}
+
+.modern-input,
+.modern-select {
   width: 100%;
-  padding: 12px 15px;
-  border: 1px solid var(--card-border) !important;
-  background-color: var(--bg-color) !important;
-  color: var(--text-primary) !important;
-  border-radius: 8px !important;
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.form-group input:focus, 
-.form-group select:focus, 
-.form-group textarea:focus,
-.add-anime-form input:focus {
+  padding: 14px 16px 14px 44px; /* Відступ зліва для іконки */
+  background: var(--surface-secondary, rgba(0,0,0,0.2));
+  border: 1px solid var(--border-light, rgba(255,255,255,0.05));
+  border-radius: 14px;
+  color: var(--text-main, #fff);
+  font-size: 15px;
+  transition: all 0.3s ease;
   outline: none;
-  border-color: var(--accent-color) !important;
-  background-color: var(--card-bg) !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
+.modern-input::placeholder,
+.modern-textarea::placeholder {
+  color: rgba(148, 163, 184, 0.5);
 }
 
-.submit-btn-custom {
-  background-color: var(--accent-color) !important;
-  color: white !important;
-  border: none !important;
-  padding: 14px 24px !important;
-  border-radius: 8px !important;
-  font-size: 16px !important;
-  font-weight: bold !important;
+.modern-input:focus,
+.modern-select:focus,
+.modern-textarea:focus {
+  background: var(--surface-card, #1e293b);
+  border-color: var(--neon-accent, #3b82f6);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.select-wrapper::after {
+  content: '▼';
+  position: absolute;
+  right: 16px;
+  font-size: 12px;
+  color: var(--text-muted, #94a3b8);
+  pointer-events: none;
+}
+.modern-select {
+  appearance: none;
   cursor: pointer;
-  transition: opacity 0.2s ease;
-  width: 100% !important;
-  max-width: 300px !important;
-  margin: 20px auto 0 !important;
-  display: block;
+}
+.modern-select option {
+  background: var(--surface-card, #1e293b);
+  color: var(--text-main, #fff);
 }
 
-.submit-btn-custom:hover {
-  opacity: 0.9;
+/* TEXTAREA */
+.textarea-wrapper {
+  position: relative;
+}
+
+.modern-textarea {
+  width: 100%;
+  padding: 16px;
+  background: var(--surface-secondary, rgba(0,0,0,0.2));
+  border: 1px solid var(--border-light, rgba(255,255,255,0.05));
+  border-radius: 14px;
+  color: var(--text-main, #fff);
+  font-size: 15px;
+  transition: all 0.3s ease;
+  outline: none;
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+/* КНОПКА САБМІТУ */
+.form-submit-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modern-submit-btn {
+  background: linear-gradient(135deg, var(--neon-accent, #3b82f6) 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.modern-submit-btn .btn-icon {
+  font-size: 20px;
+  font-weight: 300;
+}
+
+.modern-submit-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+  background: linear-gradient(135deg, #60a5fa 0%, var(--neon-accent, #3b82f6) 100%);
+}
+
+.modern-submit-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .add-anime-form-container {
+    padding: 24px;
+  }
+  .form-submit-container {
+    justify-content: center;
+  }
+  .modern-submit-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

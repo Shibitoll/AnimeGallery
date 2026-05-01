@@ -1,0 +1,702 @@
+/* src/styles/AnimeDetails.css */
+
+/* =======================================================
+   ОСНОВНІ ЗМІННІ ТА КОЛЬОРИ
+   Використовуємо адаптивні змінні для ідеального контрасту
+======================================================== */
+:root {
+  --neon-accent: #3b82f6;
+  --neon-accent-hover: #2563eb;
+  --neon-glow: rgba(59, 130, 246, 0.4);
+  
+  /* Дефолтні значення для Світлої Теми */
+  --bg-app: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-secondary: #f1f5f9;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-light: rgba(15, 23, 42, 0.08);
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-strong: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* =======================================================
+   ТЕМНА ТЕМА
+   Автоматично перемикається, якщо у батьків є клас .dark-theme
+======================================================== */
+.dark-theme,
+[data-theme="dark"] {
+  --bg-app: #090e17; /* Дуже глибокий темно-синій */
+  --surface-card: #151e2e; /* Світліший синій для карток */
+  --surface-secondary: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-light: rgba(255, 255, 255, 0.08);
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-strong: 0 10px 40px rgba(0, 0, 0, 0.5);
+  --neon-accent: #60a5fa; /* Світліший акцент для темної теми */
+}
+
+.player-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tab-btn {
+  background: var(--surface-secondary, rgba(255,255,255,0.05));
+  border: 1px solid var(--border-light, rgba(255,255,255,0.1));
+  color: var(--text-muted, #94a3b8);
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+  background: var(--surface-card, #1e293b);
+  color: var(--text-main, #fff);
+}
+
+.tab-btn.active {
+  background: var(--neon-accent, #3b82f6);
+  color: white;
+  border-color: var(--neon-accent, #3b82f6);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+/* ====================================
+   КОМПАКТНА КАРТКА
+==================================== */
+.anime-card-modern.compact .card-info {
+  padding: 12px;
+}
+
+.compact-genre {
+  margin-bottom: 12px;
+}
+
+.compact-actions {
+  padding-top: 12px;
+  gap: 8px;
+}
+
+.compact-rating .display-rating-wrapper {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.compact-rating span {
+  font-size: 12px;
+}
+
+/* =======================================================
+   ГЛОБАЛЬНІ НАЛАШТУВАННЯ
+======================================================== */
+.anime-details-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  /* Анімація появи сторінки */
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =======================================================
+   КНОПКА "НАЗАД"
+======================================================== */
+.back-button {
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  color: var(--text-main);
+  transform: translateX(-4px);
+  border-color: var(--neon-accent);
+  box-shadow: 0 0 15px var(--neon-glow);
+}
+
+
+/* =======================================================
+   ГОЛОВНИЙ БЛОК (Постер + Опис)
+======================================================== */
+.anime-main-block {
+  display: flex;
+  gap: 50px;
+  margin-bottom: 60px;
+  background: var(--surface-card);
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: var(--shadow-strong);
+  border: 1px solid var(--border-light);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ================= ПАНЕЛЬ КЕРУВАННЯ (Трекер) ================= */
+.tracker-panel {
+  margin-top: 20px;
+  background: var(--surface-card, #1e293b);
+  border: 1px solid var(--border-light, rgba(255,255,255,0.05));
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.tracker-title {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.track-btn {
+  background: var(--surface-secondary, rgba(0,0,0,0.2));
+  border: 1px solid transparent;
+  color: var(--text-main, #fff);
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.track-btn:hover {
+  background: var(--border-light, rgba(255,255,255,0.1));
+  transform: translateY(-2px);
+}
+
+/* Кольори для активованих статусів */
+.track-btn.active-watch {
+  background: rgba(34, 197, 94, 0.15); /* Зелений фон */
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+.track-btn.active-plan {
+  background: rgba(59, 130, 246, 0.15); /* Синій фон */
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.track-btn.active-fav {
+  background: rgba(239, 68, 68, 0.15); /* Червоний фон */
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* Градієнтне фонове підсвічування для блоку */
+.anime-main-block::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, var(--neon-glow) 0%, transparent 60%);
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.anime-sidebar, .anime-info {
+  z-index: 1; /* Щоб контент був над градієнтом */
+}
+
+.anime-sidebar {
+  flex: 0 0 300px;
+}
+
+/* ПОСТЕР */
+.poster-wrapper {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-strong);
+  border: 2px solid var(--surface-secondary);
+  transition: transform 0.3s ease;
+}
+
+.poster-wrapper:hover {
+  transform: translateY(-5px);
+}
+
+.anime-poster {
+  width: 100%;
+  height: 450px;
+  object-fit: cover;
+  display: block;
+}
+
+.status-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(220, 38, 38, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.4);
+}
+
+/* КНОПКИ ДІЙ */
+.action-buttons {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.action-btn {
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.action-btn:hover { 
+  background: var(--border-light); 
+  transform: translateY(-2px);
+}
+
+.action-btn.active { 
+  background: rgba(59, 130, 246, 0.1); 
+  border-color: var(--neon-accent); 
+  color: var(--neon-accent);
+  box-shadow: inset 0 0 0 1px var(--neon-accent);
+}
+
+.share-btn { 
+  grid-column: span 2; 
+}
+
+/* ПРАВА КОЛОНКА */
+.anime-info {
+  flex: 1;
+}
+
+.anime-title {
+  font-size: 30px;
+  font-weight: 800;
+  margin: 0 0 16px 0;
+  line-height: 1.1;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+
+.anime-subtitle {
+  color: var(--text-muted);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 30px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.anime-description {
+  line-height: 1.8;
+  font-size: 16px;
+  margin-bottom: 40px;
+  color: var(--text-main);
+  opacity: 0.85;
+}
+
+/* СІТКА ХАРАКТЕРИСТИК */
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+  background: var(--surface-secondary);
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+}
+
+.detail-item {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.detail-item strong {
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ЖАНРИ */
+.genres-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.genre-tag {
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  box-shadow: var(--shadow-soft);
+  transition: all 0.2s ease;
+}
+
+.genre-tag:hover {
+  border-color: var(--neon-accent);
+  color: var(--neon-accent);
+}
+
+/* =======================================================
+   ВІДЕО СЕКЦІЯ (ПЛЕЄР + СЕРІЇ)
+======================================================== */
+.video-section {
+  background: var(--surface-card);
+  padding: 40px;
+  border-radius: 24px;
+  margin-bottom: 60px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-strong);
+}
+
+.video-section h2 {
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.video-section h2::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 28px;
+  background: var(--neon-accent);
+  border-radius: 4px;
+}
+
+/* ПЛЕЄР */
+.player-wrapper {
+  background: #000; /* Плеєр ЗАВЖДИ чорний, щоб не псувати кольори відео */
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 40px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* КНОПКИ СЕРІЙ */
+.episodes-container h3 {
+  font-size: 20px;
+  color: var(--text-main);
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.episodes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 16px;
+}
+
+.episode-btn {
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  padding: 14px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-soft);
+}
+
+.episode-btn:hover { 
+  background: var(--surface-card);
+  border-color: var(--neon-accent);
+  color: var(--neon-accent);
+  transform: translateY(-2px);
+}
+
+.episode-btn.active { 
+  background: var(--neon-accent); 
+  border-color: var(--neon-accent);
+  color: white;
+  box-shadow: 0 8px 20px var(--neon-glow);
+}
+
+/* =======================================================
+   СЕКЦІЯ КОМЕНТАРІВ
+======================================================== */
+.community-section {
+  background: var(--surface-card);
+  padding: 40px;
+  border-radius: 24px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-strong);
+}
+
+.community-section h2 {
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.community-section h2::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 28px;
+  background: var(--neon-accent);
+  border-radius: 4px;
+}
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 50px;
+  background: var(--surface-secondary);
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+}
+
+.rating-select {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.rating-select input {
+  background: var(--surface-card);
+  border: 2px solid var(--border-light);
+  color: var(--text-main);
+  padding: 10px 16px;
+  border-radius: 8px;
+  width: 80px;
+  font-size: 16px;
+  outline: none;
+  font-weight: bold;
+}
+
+.rating-select input:focus {
+  border-color: var(--neon-accent);
+  box-shadow: 0 0 0 3px var(--neon-glow);
+}
+
+.comment-form textarea {
+  background: var(--surface-card);
+  border: 2px solid var(--border-light);
+  color: var(--text-main);
+  padding: 20px;
+  border-radius: 12px;
+  min-height: 140px;
+  font-family: inherit;
+  font-size: 15px;
+  resize: vertical;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.comment-form textarea:focus {
+  border-color: var(--neon-accent);
+  box-shadow: 0 0 0 3px var(--neon-glow);
+}
+
+.submit-comment-btn {
+  align-self: flex-end;
+  background: var(--neon-accent);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px var(--neon-glow);
+}
+
+.submit-comment-btn:hover {
+  background: var(--neon-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--neon-glow);
+}
+
+.comment-card {
+  background: var(--surface-secondary);
+  padding: 24px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-light);
+  transition: transform 0.2s ease;
+}
+
+.comment-card:hover {
+  transform: translateX(4px);
+  border-color: var(--neon-accent);
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 16px;
+}
+
+.comment-header strong { 
+  color: var(--text-main); 
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.comment-date {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.comment-rating {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706; /* Колір для світлої теми */
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  margin-left: auto;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.dark-theme .comment-rating,
+[data-theme="dark"] .comment-rating {
+  background: rgba(250, 204, 21, 0.1);
+  color: #facc15; /* Колір для темної теми */
+  border: 1px solid rgba(250, 204, 21, 0.2);
+}
+
+.comment-text {
+  color: var(--text-main);
+  opacity: 0.85;
+  line-height: 1.7;
+  font-size: 15px;
+  margin: 0;
+}
+
+/* =======================================================
+   АДАПТИВНІСТЬ ДЛЯ МОБІЛЬНИХ
+======================================================== */
+@media (max-width: 900px) {
+  .anime-main-block { 
+    flex-direction: column; 
+    padding: 30px 20px;
+  }
+  .anime-sidebar { 
+    flex: auto; 
+    max-width: 320px;
+    margin: 0 auto;
+  }
+  .anime-title {
+    font-size: 32px;
+    text-align: center;
+  }
+  .anime-subtitle {
+    justify-content: center;
+  }
+  .details-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .video-section, .community-section {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 500px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+  .action-buttons {
+    grid-template-columns: 1fr;
+  }
+  .share-btn {
+    grid-column: span 1;
+  }
+  .anime-poster {
+    height: 400px;
+  }
+}
+
+.back-to-trailer-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.back-to-trailer-btn:hover {
+  background: var(--accent);
+  color: white;
+}
