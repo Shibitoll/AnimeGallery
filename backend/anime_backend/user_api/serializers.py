@@ -1,20 +1,25 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from .models import CustomUser
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'username', 'email', 'avatar', 'bio')
 
 class RegisterSerializer(serializers.ModelSerializer):
-    # write_only=True — щоб пароль ніколи не повертався у відповіді API
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = ('username', 'password', 'email')
 
     def create(self, validated_data):
-        # create_user автоматично зашифрує пароль у базі
-        user = User.objects.create_user(
+        # Використовуємо CustomUser для створення
+        user = CustomUser.objects.create_user(
             username=validated_data['username'],
-            email=validated_data.get('email'),
+            email=validated_data.get('email', ''),
             password=validated_data['password']
         )
         return user

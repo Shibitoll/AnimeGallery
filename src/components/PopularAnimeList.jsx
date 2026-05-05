@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AnimeCard from './AnimeCard';
 
-const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onTogglePlanned, onUpdateRating, isHomePage }) => {
+const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatching, onToggleWatched, onTogglePlanned, onUpdateRating, isHomePage }) => {
   const [popular, setPopular] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -164,6 +164,7 @@ const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched,
                 if (actionType === 'watched') onToggleWatched(localAnime.id);
                 if (actionType === 'planned') onTogglePlanned(localAnime.id);
                 if (actionType === 'rating') onUpdateRating(localAnime.id, value);
+                if (actionType === 'watching') onToggleWatching(localAnime.id);
               } else {
                 const newAnime = {
                   mal_id: String(animeId),
@@ -177,6 +178,7 @@ const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched,
                   status: anime.status || 'Unknown',
                   genres: anime.genres?.length > 0 ? anime.genres.join(', ') : 'Популярне',
                   isFavorite: actionType === 'favorite',
+                  isWatching: actionType === 'watching',
                   isWatched: actionType === 'watched',
                   planned: actionType === 'planned', 
                   userRating: actionType === 'rating' ? parseFloat(value || 0).toFixed(1) : '0.0',
@@ -199,12 +201,14 @@ const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched,
                 episodes={anime.episodes || 0}
                 studio={anime.studio || 'Популярне'}
                 genres={anime.genres?.length > 0 ? anime.genres.join(', ') : 'Популярне'}
-                isFavorite={localAnime ? localAnime.isFavorite : false} 
+                isFavorite={localAnime ? localAnime.isFavorite : false}
+                isWatching={localAnime ? localAnime.isWatching : false}
                 isWatched={localAnime ? localAnime.isWatched : false}
                 planned={localAnime ? localAnime.planned : false}
                 userRating={localAnime ? localAnime.userRating : '0.0'}
                 isAddedByUser={false}
                 onToggleFavorite={() => handleAction('favorite')}
+                onToggleWatching={() => handleAction('watching')}
                 onToggleWatched={() => handleAction('watched')}
                 onTogglePlanned={() => handleAction('planned')}
                 onUpdateRating={(_, val) => handleAction('rating', val)}

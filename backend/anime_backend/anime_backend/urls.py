@@ -18,6 +18,7 @@ urlpatterns = [
 
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'), # Генерація файлу OpenAPI
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'), # Інтерактивний інтерфейс
+    path('api/users/', include('user_api.urls')),
 ]
 """
 list: Загальний список маршрутів (URL-адрес) проєкту.

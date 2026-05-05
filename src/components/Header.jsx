@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
-const Header = ({ favoriteCount, watchedCount, plannedCount, currentTab, setCurrentTab }) => {
+const Header = ({ favoriteCount, watchingCount, watchedCount, plannedCount, currentTab, setCurrentTab, isAuthenticated, onLogout, userName }) => {
     const { theme, toggleTheme } = useTheme();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
@@ -13,10 +13,9 @@ const Header = ({ favoriteCount, watchedCount, plannedCount, currentTab, setCurr
     const [showSuggestions, setShowSuggestions] = useState(false);
 
     const dropdownRef = useRef(null);
-    const searchRef = useRef(null); // Реф для кліку поза пошуком
+    const searchRef = useRef(null);
     const navigate = useNavigate();
 
-    // Закриття меню та підказок при кліку поза ними
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -31,23 +30,19 @@ const Header = ({ favoriteCount, watchedCount, plannedCount, currentTab, setCurr
     }, []);
 
     useEffect(() => {
-        // Якщо введено менше 3 символів, не робимо запит
         if (searchInput.trim().length < 3) {
             setSuggestions([]);
             setShowSuggestions(false);
             return;
         }
 
-        // Запускаємо таймер на 500мс
         const delayDebounceFn = setTimeout(async () => {
             setIsSearching(true);
             setShowSuggestions(true);
             try {
                 const response = await fetch(`http://localhost:8000/api/streaming/search/?q=${encodeURIComponent(searchInput.trim())}`);
                 const data = await response.json();
-                
                 if (data.results) {
-                    // Беремо лише перші 5 результатів для підказок
                     setSuggestions(data.results.slice(0, 5)); 
                 }
             } catch (error) {
@@ -57,7 +52,6 @@ const Header = ({ favoriteCount, watchedCount, plannedCount, currentTab, setCurr
             }
         }, 500);
 
-        // Якщо користувач продовжує друкувати, очищаємо попередній таймер
         return () => clearTimeout(delayDebounceFn);
     }, [searchInput]);
 
@@ -69,26 +63,25 @@ const Header = ({ favoriteCount, watchedCount, plannedCount, currentTab, setCurr
         setIsDropdownOpen(false);
     };
 
-    // Обробник для переходу на сторінку розширеного пошуку
     const handleSearchSubmit = (e) => {
         if (e) e.preventDefault();
         if (searchInput.trim()) {
             navigate(`/search?q=${encodeURIComponent(searchInput.trim())}`);
             setCurrentTab('search');
-            setShowSuggestions(false); // Ховаємо підказки
+            setShowSuggestions(false);
         }
     };
 
-    // Перехід безпосередньо на сторінку аніме з підказки
     const handleSuggestionClick = (animeId) => {
         navigate(`/anime/${animeId}`);
         setSearchInput('');
         setShowSuggestions(false);
     };
     
-    const handleLogout = () => {
-        console.log("Вихід з акаунта...");
+    // ДОДАНО: Логіка для виходу
+    const handleUserLogout = () => {
         setIsDropdownOpen(false);
+        if (onLogout) onLogout();
     };
 
     return (
@@ -114,7 +107,7 @@ const Header = ({ favoriteCount, watchedCount, plannedCount, currentTab, setCurr
 
                 <div className="header-actions">
                     
-                    {/* БЛОК ПОШУКУ З ПІДКАЗКАМИ */}
+                    {/* БЛОК ПОШУКУ */}
                     <div className="search-container" ref={searchRef}>
                         <form className="search-form" onSubmit={handleSearchSubmit}>
                             <input 
@@ -128,7 +121,7 @@ const Header = ({ favoriteCount, watchedCount, plannedCount, currentTab, setCurr
                             <button type="submit" className="search-btn">🔍</button>
                         </form>
 
-                        {/* ВИПАДАЮЧИЙ СПИСОК */}
+                        {/* ВИПАДАЮЧИЙ СПИСОК ПІДКАЗОК */}
                         {showSuggestions && searchInput.trim().length >= 3 && (
                             <div className="suggestions-dropdown">
                                 {isSearching ? (
@@ -165,63 +158,79 @@ const Header = ({ favoriteCount, watchedCount, plannedCount, currentTab, setCurr
                         )}
                     </div>
 
-                    <NavLink 
-                        to="/my-anime" 
-                        className={`add-anime-btn ${currentTab === 'my-anime' ? 'active' : ''}`}
-                        onClick={() => handleNavClick('my-anime')}
-                    >
-                        + Мої аніме
-                    </NavLink>
+                    {/* ДОДАНО: Перевірка авторизації */}
+                    {isAuthenticated ? (
+                        <>
+                            <NavLink 
+                                to="/my-anime" 
+                                className={`add-anime-btn ${currentTab === 'my-anime' ? 'active' : ''}`}
+                                onClick={() => handleNavClick('my-anime')}
+                            >
+                                + Мої аніме
+                            </NavLink>
 
-                    <div className="user-menu-container" ref={dropdownRef}>
-                        <button 
-                            className={`user-profile-btn ${isDropdownOpen ? 'active' : ''}`}
-                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        >
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Avatar" className="user-avatar" />
-                            <span className="user-name">Олексій</span>
-                            <span className="dropdown-arrow">▼</span>
-                        </button>
+                            <div className="user-menu-container" ref={dropdownRef}>
+                                <button 
+                                    className={`user-profile-btn ${isDropdownOpen ? 'active' : ''}`}
+                                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                >
+                                    <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${userName || 'User'}`} alt="Avatar" className="user-avatar" />
+                                    {/* ‼️ ТУТ ТЕПЕР ВІДОБРАЖАЄТЬСЯ ІМ'Я КОРИСТУВАЧА ‼️ */}
+                                    <span className="user-name">{userName || 'Мій профіль'}</span>
+                                    <span className="dropdown-arrow">▼</span>
+                                </button>
 
-                        <div className={`dropdown-menu ${isDropdownOpen ? 'show' : ''}`}>
-                            <div className="dropdown-header">
-                                <strong>Мій акаунт</strong>
-                                <span>alex@example.com</span>
+                                <div className={`dropdown-menu ${isDropdownOpen ? 'show' : ''}`}>
+                                    <div className="dropdown-header">
+                                        <NavLink to="/profile" className="dropdown-item" onClick={() => handleNavClick('profile')}>
+                                            <span className="item-icon">👤</span> Мій профіль
+                                         </NavLink>
+                                    </div>
+                                    
+                                    <div className="dropdown-divider"></div>
+
+                                    <NavLink to="/favorite" className="dropdown-item" onClick={() => handleNavClick('favorite')}>
+                                        <span className="item-icon">❤️</span> 
+                                        Улюблені {favoriteCount > 0 && <span className="badge">{favoriteCount}</span>}
+                                    </NavLink>
+                                    <NavLink to="/watched" className="dropdown-item" onClick={() => handleNavClick('watched')}>
+                                        <span className="item-icon">✅</span> 
+                                        Переглянуто {watchedCount > 0 && <span className="badge">{watchedCount}</span>}
+                                    </NavLink>
+                                    <NavLink to="/watching" className="dropdown-item" onClick={() => handleNavClick('watching')}>
+                                        <span className="item-icon">▶️</span> 
+                                        Дивлюся {watchingCount > 0 && <span className="badge blue">{watchingCount}</span>}
+                                    </NavLink>
+                                    <NavLink to="/planned" className="dropdown-item" onClick={() => handleNavClick('planned')}>
+                                        <span className="item-icon">📅</span> 
+                                        В планах {plannedCount > 0 && <span className="badge blue">{plannedCount}</span>}
+                                    </NavLink>
+                                    
+                                    <div className="dropdown-divider"></div>
+
+                                    <NavLink to="/about" className="dropdown-item" onClick={() => handleNavClick('about')}>
+                                        <span className="item-icon">ℹ️</span> Про застосунок
+                                    </NavLink>
+                                    
+                                    <button className="dropdown-item theme-toggle-btn" onClick={toggleTheme}>
+                                        <span className="item-icon">{theme === 'light' ? '🌙' : '☀️'}</span> 
+                                        {theme === 'light' ? 'Нічна тема' : 'Світла тема'}
+                                    </button>
+
+                                    <div className="dropdown-divider"></div>
+
+                                    <button className="dropdown-item logout-btn" onClick={handleUserLogout}>
+                                        <span className="item-icon">🚪</span> Вийти з акаунта
+                                    </button>
+                                </div>
                             </div>
-                            
-                            <div className="dropdown-divider"></div>
-
-                            <NavLink to="/favorite" className="dropdown-item" onClick={() => handleNavClick('favorite')}>
-                                <span className="item-icon">❤️</span> 
-                                Улюблені {favoriteCount > 0 && <span className="badge">{favoriteCount}</span>}
-                            </NavLink>
-                            <NavLink to="/watched" className="dropdown-item" onClick={() => handleNavClick('watched')}>
-                                <span className="item-icon">✅</span> 
-                                Переглянуті {watchedCount > 0 && <span className="badge">{watchedCount}</span>}
-                            </NavLink>
-                            <NavLink to="/planned" className="dropdown-item" onClick={() => handleNavClick('planned')}>
-                                <span className="item-icon">📅</span> 
-                                Планую дивитись {plannedCount > 0 && <span className="badge blue">{plannedCount}</span>}
-                            </NavLink>
-                            
-                            <div className="dropdown-divider"></div>
-
-                            <NavLink to="/about" className="dropdown-item" onClick={() => handleNavClick('about')}>
-                                <span className="item-icon">ℹ️</span> Про застосунок
-                            </NavLink>
-                            
-                            <button className="dropdown-item theme-toggle-btn" onClick={toggleTheme}>
-                                <span className="item-icon">{theme === 'light' ? '🌙' : '☀️'}</span> 
-                                {theme === 'light' ? 'Нічна тема' : 'Світла тема'}
-                            </button>
-
-                            <div className="dropdown-divider"></div>
-
-                            <button className="dropdown-item logout-btn" onClick={handleLogout}>
-                                <span className="item-icon">🚪</span> Вийти з акаунта
-                            </button>
+                        </>
+                    ) : (
+                        <div className="auth-buttons">
+                            <button className="login-btn" onClick={() => { navigate('/login'); setCurrentTab(''); }}>Увійти</button>
+                            <button className="register-btn" onClick={() => { navigate('/register'); setCurrentTab(''); }}>Реєстрація</button>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </header>

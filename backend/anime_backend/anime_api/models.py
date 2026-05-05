@@ -7,7 +7,7 @@
 import logging
 from datetime import timedelta
 
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -24,7 +24,7 @@ class Anime(models.Model):
     - персональні статуси користувача
     """
     
-    # ДОДАНО db_index=True для швидкого пошуку за назвою
+    # db_index=True для швидкого пошуку за назвою
     title = models.CharField(max_length=255, verbose_name="Назва", db_index=True)
     """str: Офіційна назва аніме."""
     
@@ -37,7 +37,7 @@ class Anime(models.Model):
     poster = models.URLField(max_length=500, verbose_name="URL постера")
     """str: Посилання на зображення обкладинки/постера."""
     
-    # ДОДАНО db_index=True для швидкого пошуку за жанрами
+    # db_index=True для швидкого пошуку за жанрами
     genres = models.CharField(max_length=255, verbose_name="Жанри", db_index=True)
     """str: Список жанрів, розділених комою."""
     
@@ -53,7 +53,7 @@ class Anime(models.Model):
     status = models.CharField(max_length=100, blank=True, null=True, verbose_name="Статус")
     """str, optional: Статус виходу (наприклад, 'Виходить', 'Завершено')."""
 
-    # ДОДАНО db_index=True для швидкого сортування (ORDER BY rating DESC)
+    # db_index=True для швидкого сортування (ORDER BY rating DESC)
     rating = models.DecimalField(
         max_digits=3, 
         decimal_places=1, 
@@ -75,19 +75,18 @@ class Anime(models.Model):
     is_favorite = models.BooleanField(default=False, verbose_name="В улюблених")
     """bool: Прапорець, що вказує, чи додав користувач аніме до списку улюблених."""
     
+    is_watching = models.BooleanField(default=False, verbose_name="Дивлюся зараз")
+
     in_watchlist = models.BooleanField(default=False, verbose_name="Переглянуто")
     """bool: Прапорець, що вказує, чи додав користувач аніме до списку переглянутих."""
 
     planned = models.BooleanField(default=False, verbose_name="Планую подивитись")
     """bool: Вказує, чи планує користувач подивитися це аніме у майбутньому."""
     
-    # Зв'язок з користувачем (ER: User <-> Anime)
     owner = models.ForeignKey(
-        User, 
+        settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
-        related_name='animes', 
-        null=True, 
-        blank=True,
+        related_name='animes',
         verbose_name="Власник"
     )
     """User, optional: Зовнішній ключ, що пов'язує запис із конкретним користувачем (ER-зв'язок)."""
@@ -121,14 +120,13 @@ class Anime(models.Model):
         """
         Зберігає об'єкт моделі Anime в базу даних із вбудованим логуванням.
         """
-        # Логічна аномалія (WARNING): Аніме переглянуто, але немає власника
-        if self.in_watchlist and not self.owner:
+
+        if self.in_watchlist and not getattr(self, 'owner_id', None):
             logger.warning(
                 f"Логічна аномалія: Аніме '{self.title}' позначено як 'Переглянуто', "
-                f"але не має прив'язки до користувача (owner=None)."
+                f"але не має прив'язки до користувача."
             )
             
-        # Логічна аномалія (WARNING): Оцінка виходить за межі 10-бальної шкали
         if self.user_rating < 0.0 or self.user_rating > 10.0:
             logger.warning(
                 f"Логічна аномалія: Оцінка для '{self.title}' виходить за межі "
@@ -136,13 +134,9 @@ class Anime(models.Model):
             )
 
         try:
-            # Виклик оригінального методу збереження Django
             super().save(*args, **kwargs)
-            # Логування успішного збереження (INFO)
             logger.info(f"Запис успішно збережено в БД: Аніме '{self.title}' (ID: {self.id})")
-            
         except Exception as e:
-            # Помилка бази даних (CRITICAL) з повним стеком викликів
             logger.critical(
                 f"Критична помилка при збереженні аніме '{self.title}' в БД: {str(e)}", 
                 exc_info=True

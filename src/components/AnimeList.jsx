@@ -14,7 +14,7 @@ import AnimeCard from './AnimeCard';
  * @param {Function} props.onUpdateRating - Функція для оновлення рейтингу користувача.
  * @returns {JSX.Element} Сітка з картками аніме або повідомлення про завантаження.
  */
-const AnimeList = ({ list, onToggleFavorite, onToggleWatched, onDeleteAnime, onUpdateRating }) => {
+const AnimeList = ({ list, onToggleFavorite, onToggleWatching, onToggleWatched, onDeleteAnime, onUpdateRating }) => {
   
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12; // Скільки карток показувати на одній сторінці
@@ -54,6 +54,7 @@ const AnimeList = ({ list, onToggleFavorite, onToggleWatched, onDeleteAnime, onU
               key={anime.id}
               {...anime}
               onToggleFavorite={onToggleFavorite} 
+              onToggleWatching={onToggleWatching}
               onToggleWatched={onToggleWatched}
               isAddedByUser={anime.isAddedByUser}
               onDeleteAnime={onDeleteAnime}

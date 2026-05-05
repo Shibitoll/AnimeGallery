@@ -28,6 +28,9 @@ class AnimeSerializer(serializers.ModelSerializer):
     """DecimalField: Мапить поле `user_rating` бази даних у `userRating` для JSON."""
     isFavorite = serializers.BooleanField(source='is_favorite', required=False, default=False)
     """BooleanField: Мапить поле `is_favorite` бази даних у `isFavorite` для JSON."""
+    
+    isWatching = serializers.BooleanField(source='is_watching', required=False, default=False)
+    
     isWatched = serializers.BooleanField(source='in_watchlist', required=False, default=False)
     """BooleanField: Мапить поле `in_watchlist` бази даних у `isWatched` для JSON."""
     isAddedByUser = serializers.BooleanField(source='is_added_by_user', required=False, default=True)
@@ -44,6 +47,6 @@ class AnimeSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'mal_id', 'title', 'rating', 'userRating', 'poster', 
             'description', 'genres', 'year', 'episodes', 
-            'studio', 'status', 'isFavorite', 'isWatched', 'isAddedByUser',
+            'studio', 'status', 'isFavorite', 'isWatching', 'isWatched', 'isAddedByUser',
             'planned'
         ]

@@ -5,7 +5,7 @@ import VideoPlayer from '../components/VideoPlayer';
 import ReactPlayer from 'react-player';
 import '../styles/AnimeDetails.css';
 
-const AnimeDetails = ({ data = [], onAddAnime, onToggleFavorite, onToggleWatched, onTogglePlanned, onUpdateRating }) => {
+const AnimeDetails = ({ data = [], onAddAnime, onToggleFavorite, onToggleWatching, onToggleWatched, onTogglePlanned, onUpdateRating }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   
@@ -13,7 +13,7 @@ const AnimeDetails = ({ data = [], onAddAnime, onToggleFavorite, onToggleWatched
   const [loading, setLoading] = useState(true);
   
   const [currentEpisodeId, setCurrentEpisodeId] = useState(null);
-  const [showTrailer, setShowTrailer] = useState(true); // За замовчуванням показуємо вкладку трейлера
+  const [showTrailer, setShowTrailer] = useState(true);
 
   const [rating, setRating] = useState(0);
   const [commentText, setCommentText] = useState("");
@@ -33,7 +33,6 @@ const AnimeDetails = ({ data = [], onAddAnime, onToggleFavorite, onToggleWatched
           setCurrentEpisodeId(result.episodes[0].id);
         }
         
-        // Якщо трейлера фізично немає в базі MAL, автоматично перемикаємо на перегляд серій
         if (!result.trailer_url) {
           setShowTrailer(false);
         }
@@ -46,21 +45,24 @@ const AnimeDetails = ({ data = [], onAddAnime, onToggleFavorite, onToggleWatched
     fetchDetails();
   }, [id]);
 
-  const localAnime = data.find(a => a.id === id || a.title === anime?.title);
-  const isFav = localAnime ? localAnime.isFavorite : false;
-  const isWatch = localAnime ? localAnime.isWatched : false;
+  const localAnime = data.find(a => String(a.id) === String(id) || String(a.mal_id) === String(id) || a.title === anime?.title);
+  const isFav = localAnime ? localAnime.is_favorite : false;
+  const isWatching = localAnime ? localAnime.is_watching : false; // ДОДАНО
+  const isWatch = localAnime ? localAnime.in_watchlist : false;
   const isPlanned = localAnime ? localAnime.planned : false;
 
   const handleAction = (actionType, value = '0.0') => {
     if (localAnime) {
-      if (actionType === 'favorite' && onToggleFavorite) onToggleFavorite(localAnime.id);
-      if (actionType === 'watched' && onToggleWatched) onToggleWatched(localAnime.id);
-      if (actionType === 'planned' && onTogglePlanned) onTogglePlanned(localAnime.id); // ДОДАНО
-      if (actionType === 'rating' && onUpdateRating) onUpdateRating(localAnime.id, value);
+      if (actionType === 'favorite' && onToggleFavorite) onToggleFavorite(localAnime);
+      if (actionType === 'watching' && onToggleWatching) onToggleWatching(localAnime); // ДОДАНО
+      if (actionType === 'watched' && onToggleWatched) onToggleWatched(localAnime);
+      if (actionType === 'planned' && onTogglePlanned) onTogglePlanned(localAnime);
+      if (actionType === 'rating' && onUpdateRating) onUpdateRating(localAnime, value);
     } else {
       if (onAddAnime && anime) {
         const newAnime = {
           id: id,
+          mal_id: id,
           title: anime.title,
           poster: anime.image,
           rating: anime.rating ? parseFloat(anime.rating).toFixed(1) : '0.0',
@@ -69,11 +71,12 @@ const AnimeDetails = ({ data = [], onAddAnime, onToggleFavorite, onToggleWatched
           episodes: anime.episodes?.length || 0,
           studio: 'Невідома',
           genres: anime.genres?.length > 0 ? anime.genres.join(', ') : 'Різне',
-          isFavorite: actionType === 'favorite',
-          isWatched: actionType === 'watched',
+          is_favorite: actionType === 'favorite',
+          is_watching: actionType === 'watching', // ДОДАНО
+          in_watchlist: actionType === 'watched',
           planned: actionType === 'planned',
-          userRating: actionType === 'rating' ? value : '0.0',
-          isAddedByUser: false
+          user_rating: actionType === 'rating' ? value : '0.0',
+          is_added_by_user: false
         };
         onAddAnime(newAnime);
       }
@@ -82,7 +85,12 @@ const AnimeDetails = ({ data = [], onAddAnime, onToggleFavorite, onToggleWatched
 
   const handleEpisodeClick = (epId) => {
     setCurrentEpisodeId(epId);
-    setShowTrailer(false); // Вимикаємо трейлер, вмикаємо серію
+    setShowTrailer(false);
+    
+    // Автоматично ставимо статус "Дивлюся", якщо користувач почав перегляд і статус ще не "Переглянуто"
+    if (!isWatch && !isWatching) {
+        handleAction('watching');
+    }
   };
 
   const handleAddComment = (e) => {
@@ -109,7 +117,6 @@ const AnimeDetails = ({ data = [], onAddAnime, onToggleFavorite, onToggleWatched
         &larr; Назад до каталогу
       </button>
 
-      {/* ================= БЛОК ДЕТАЛЬНОЇ ІНФОРМАЦІЇ ================= */}
       <div className="anime-main-block">
         <div className="anime-sidebar">
           <div className="poster-wrapper">
@@ -120,18 +127,63 @@ const AnimeDetails = ({ data = [], onAddAnime, onToggleFavorite, onToggleWatched
           <div className="tracker-panel">
             <h4 className="tracker-title">Мій список</h4>
             
-            <button 
-              className={`track-btn ${isWatch ? 'active-watch' : ''}`} 
-              onClick={() => handleAction('watched')}
-            >
-              {isWatch ? '✅ Переглянуто' : '👁️ Відмітити як переглянуте'}
-            </button>
+            {/* --- РОЗУМНИЙ БЛОК СТАТУСІВ ПЕРЕГЛЯДУ --- */}
+            {!isWatching && !isWatch && (
+              <button 
+                className="track-btn" 
+                onClick={() => handleAction('watching')}
+                style={{ marginBottom: '10px' }}
+              >
+                👁️ Почати перегляд
+              </button>
+            )}
+
+            {isWatching && !isWatch && (
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                <div 
+                className="full-width-btn"
+                style={{ 
+                  flex: 1, 
+                  backgroundColor: '#3b82f6', 
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 'var(--radius)',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  cursor: 'default' // Робить курсор стандартним
+                }}
+              >
+                ▶️ Дивлюся
+              </div>
+                <button 
+                  className="track-btn" 
+                  onClick={() => handleAction('watched')}
+                  style={{ flex: 1, margin: 0, padding: '8px 4px' }}
+                  title="Завершити перегляд?"
+                >
+                  🏁 Завершив?
+                </button>
+              </div>
+            )}
+
+            {isWatch && (
+              <button 
+                className="track-btn active-watch" 
+                onClick={() => handleAction('watched')}
+                style={{ marginBottom: '10px', backgroundColor: '#10b981', borderColor: '#10b981', color: '#fff' }}
+              >
+                ✅ Переглянуто
+              </button>
+            )}
 
             <button 
               className={`track-btn ${isPlanned ? 'active-plan' : ''}`} 
               onClick={() => handleAction('planned')}
+              style={{ marginBottom: '10px' }}
             >
-              {isPlanned ? '📅 В планах' : '➕ Додати в плани'}
+              {isPlanned ? '📅 В планах' : '⏳ Додати в плани'}
             </button>
 
             <button 
@@ -171,7 +223,6 @@ const AnimeDetails = ({ data = [], onAddAnime, onToggleFavorite, onToggleWatched
         </div>
       </div>
 
-      {/* ================= БЛОК ПЛЕЄРА ТА ВІДЕО ================= */}
       <div className="video-section">
         <div className="player-tabs">
           {anime.trailer_url && (
@@ -233,7 +284,6 @@ const AnimeDetails = ({ data = [], onAddAnime, onToggleFavorite, onToggleWatched
         </div>
       </div>
 
-      {/* ================= БЛОК КОМЕНТАРІВ ТА ОЦІНЮВАННЯ ================= */}
       <div className="community-section">
         <h2>Відгуки та коментарі ({comments.length})</h2>
         

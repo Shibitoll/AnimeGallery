@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import AnimeCard from '../components/AnimeCard';
 import '../styles/Search.css';
 
-const Search = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onTogglePlanned, onUpdateRating }) => {
+const Search = ({ data, onAddAnime, onToggleFavorite, onToggleWatching, onToggleWatched, onTogglePlanned, onUpdateRating }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlQuery = searchParams.get('q') || '';
   const navigate = useNavigate();
@@ -286,6 +286,7 @@ const Search = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onToggleP
                   if (actionType === 'watched') onToggleWatched(localAnime.id);
                   if (actionType === 'planned') onTogglePlanned(localAnime.id);
                   if (actionType === 'rating') onUpdateRating(localAnime.id, value);
+                  if (actionType === 'watching') onToggleWatching(localAnime.id);
                 } else {
                   const newAnime = {
                     mal_id: String(animeId),
@@ -299,6 +300,7 @@ const Search = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onToggleP
                     status: anime.status || 'Unknown',
                     genres: anime.genres?.length > 0 ? anime.genres.join(', ') : 'Різне',
                     isFavorite: actionType === 'favorite',
+                    isWatching: actionType === 'watching',
                     isWatched: actionType === 'watched',
                     planned: actionType === 'planned', 
                     userRating: actionType === 'rating' ? parseFloat(value || 0).toFixed(1) : '0.0',
@@ -322,11 +324,13 @@ const Search = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onToggleP
                   studio={anime.studio || 'Невідома'}
                   genres={anime.genres?.length > 0 ? anime.genres.join(', ') : 'Різне'}
                   isFavorite={localAnime ? localAnime.isFavorite : false} 
+                  isWatching={localAnime ? localAnime.isWatching : false}
                   isWatched={localAnime ? localAnime.isWatched : false}
                   planned={localAnime ? localAnime.planned : false}
                   userRating={localAnime ? localAnime.userRating : '0.0'}
                   isAddedByUser={false}
                   onToggleFavorite={() => handleAction('favorite')}
+                  onToggleWatching={() => handleAction('watching')}
                   onToggleWatched={() => handleAction('watched')}
                   onTogglePlanned={() => handleAction('planned')}
                   onUpdateRating={(_, val) => handleAction('rating', val)}

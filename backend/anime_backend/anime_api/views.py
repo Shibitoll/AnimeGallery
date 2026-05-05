@@ -12,10 +12,10 @@ import requests
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django_filters.rest_framework import DjangoFilterBackend
-from pyinstrument import Profiler
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.permissions import IsAuthenticated
 
 # Важливо: імпортуємо і Anime і AnimeCache
 from .models import Anime, AnimeCache
@@ -41,39 +41,53 @@ class AnimeViewSet(viewsets.ModelViewSet):
     - Текстового пошуку (за назвою, описом, жанрами).
     - Сортування (за рейтингом, роком, назвою).
     """
-    queryset = Anime.objects.all()
-    """QuerySet: Базовий набір даних, що включає всі об'єкти аніме з бази даних."""
+    
+    # 1. ЗАХИСТ: Доступ тільки для авторизованих користувачів
+    permission_classes = [IsAuthenticated]
+    
     serializer_class = AnimeSerializer
     """Serializer: Серіалізатор для перетворення даних аніме у JSON."""
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     """list: Набір бекендів, що активують функціонал фільтрації, пошуку та сортування у DRF."""
 
-    # Фільтрація за категоріями (корисно для вкладок)
-    filterset_fields = ['is_favorite', 'in_watchlist', 'year', 'studio']
-    """list: Поля для точної фільтрації (наприклад, `/api/animes/?is_favorite=true`)."""
-    # Пошук за текстом
+    # is_watched та planned для коректної роботи вкладок у React
+    filterset_fields = ['is_favorite', 'in_watchlist', 'planned', 'year', 'studio']
     search_fields = ['title', 'description', 'genres']
-    """list: Поля для повнотекстового пошуку (наприклад, `/api/animes/?search=Naruto`)."""
-    # Сортування
     ordering_fields = ['rating', 'year', 'title']
-    """list: Поля, за якими можна сортувати результати (наприклад, `/api/animes/?ordering=-rating`)."""
+
+    # 2. ПЕРСОНАЛІЗАЦІЯ: Повертаємо тільки аніме, що належать поточному користувачу
+    def get_queryset(self):
+        """
+        Повертає тільки ті аніме, власником яких є поточний користувач,
+        що робить запит (автоматично береться з JWT токена).
+        """
+        return Anime.objects.filter(owner=self.request.user)
+
+    # 3. ВИПРАВЛЕННЯ ПОМИЛКИ 500: Забезпечуємо, що при створенні аніме обов'язково вказується власник (owner).
+    def perform_create(self, serializer):
+        """
+        Примусово вказуємо, що власником аніме є користувач, який робить запит.
+        Викликається автоматично всередині базового методу create.
+        """
+        serializer.save(owner=self.request.user)
 
     def list(self, request, *args, **kwargs):
         """
-        Перевизначений метод отримання списку (Логування + Профілювання).
+        Перевизначений метод отримання списку (Тільки логування, без профайлера).
         """
         logger.debug(f"Запит на отримання списку аніме. Параметри: {request.query_params}")
         
-        profiler = Profiler(interval=0.001)
-        profiler.start()
-        
+        # Викликаємо стандартний метод DRF для отримання списку
         response = super().list(request, *args, **kwargs)
         
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True))
+        # Безпечний підрахунок кількості аніме (підтримує як пагінацію, так і звичайний список)
+        if isinstance(response.data, dict):
+            count = len(response.data.get('results', response.data))
+        else:
+            count = len(response.data)
+        logger.info(f"Успішно віддано список з {count} аніме користувачу {request.user.username}.")
         
-        logger.info(f"Успішно віддано список з {len(response.data)} аніме.")
         return response
 
     def create(self, request, *args, **kwargs):
@@ -83,15 +97,17 @@ class AnimeViewSet(viewsets.ModelViewSet):
         logger.debug(f"Спроба створити нове аніме. Дані: {request.data}")
         
         try:
-            # Викликаємо стандартний метод DRF для створення
+            # Викликаємо стандартний метод DRF для створення (який викличе наш perform_create)
             response = super().create(request, *args, **kwargs)
             logger.info(f"Успішно створено аніме: '{response.data.get('title')}' (ID: {response.data.get('id')})")
             return response
             
         except ValidationError as e:
-            # ЛОГУЄМО ПОМИЛКУ ВАЛІДАЦІЇ (WARNING)
-            logger.warning(f"Помилка валідації при створенні аніме.Надіслані дані: {request.data}. Помилки: {e.detail}")
-            # Прокидаємо помилку далі, щоб DRF відповів клієнту статусом 400
+            logger.warning(
+                "Помилка валідації при створенні аніме. "
+                f"Надіслані дані: {request.data}. "
+                f"Помилки: {e.detail}"
+            )
             raise e
 
     def destroy(self, request, *args, **kwargs):
@@ -110,8 +126,6 @@ class AnimeViewSet(viewsets.ModelViewSet):
         
         logger.info(f"Аніме '{anime_title}' було остаточно видалено з бази даних.")
         return response
-
-
 # Проксі-API для стрімінгу та каталогу
 
 JIKAN_URL = 'https://api.jikan.moe/v4'
@@ -122,7 +136,7 @@ def get_top_airing(request):
     try:
         page = request.GET.get('page', 1)
         
-        # ДОДАНО: &sfw=true просить Jikan не повертати контент 18+
+        # &sfw=true просить Jikan не повертати контент 18+
         response = requests.get(f"{JIKAN_URL}/seasons/now?page={page}&sfw=true", timeout=10)
         response.raise_for_status()
         
@@ -145,7 +159,7 @@ def get_top_airing(request):
             is_explicit = 'Rx' in age_rating
             
             if has_forbidden_genre or is_explicit:
-                continue # ПРОПУСКАЄМО це аніме, воно не потрапить на сайт!
+                continue
             
             results.append({
                 'id': str(item.get('mal_id')),
@@ -175,7 +189,7 @@ def get_popular_anime(request):
     try:
         page = request.GET.get('page', 1)
         
-        # ДОДАНО: &sfw=true
+        # &sfw=true
         response = requests.get(f"{JIKAN_URL}/top/anime?filter=bypopularity&page={page}&sfw=true", timeout=10)
         response.raise_for_status()
         

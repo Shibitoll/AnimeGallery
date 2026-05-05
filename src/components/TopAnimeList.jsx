@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AnimeCard from './AnimeCard';
 
-const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onTogglePlanned, onUpdateRating, isHomePage }) => {
+const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatching, onToggleWatched, onTogglePlanned, onUpdateRating, isHomePage }) => {
   const [topAnime, setTopAnime] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -9,7 +9,8 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
   const [totalPages, setTotalPages] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
 
-  const [filters, setFilters] = useState({ type: '' });
+  // ДОДАНО: 'rating' для вікової категорії
+  const [filters, setFilters] = useState({ type: '', rating: '' });
   
   // ВИКЛЮЧНО ФРОНТЕНД-СОРТУВАННЯ
   const [localSort, setLocalSort] = useState('default');
@@ -20,6 +21,7 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
         setIsLoading(true);
         let apiUrl = `http://localhost:8000/api/streaming/top-airing/?page=${page}`;
         if (filters.type) apiUrl += `&type=${filters.type}`;
+        if (filters.rating) apiUrl += `&rating=${filters.rating}`; // ДОДАНО: передача рейтингу в API
 
         const response = await fetch(apiUrl);
         const result = await response.json();
@@ -96,7 +98,7 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
           <div className="filters-container" style={{ marginBottom: '30px', justifyContent: 'flex-start' }}>
             <div className="filter-group">
               <label>Формат випуску</label>
-              <select value={filters.type} onChange={(e) => { setFilters({ type: e.target.value }); setPage(1); }}>
+              <select value={filters.type} onChange={(e) => { setFilters({ ...filters, type: e.target.value }); setPage(1); }}>
                 <option value="">Усі формати</option>
                 <option value="tv">TV-серіал (ТБ)</option>
                 <option value="movie">Повнометражний фільм</option>
@@ -104,11 +106,21 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
               </select>
             </div>
 
-            {/* МЕНЮ ФРОНТЕНД-СОРТУВАННЯ */}
+            {/* ДОДАНО: Вікова категорія (як у PopularAnimeList) */}
+            <div className="filter-group">
+              <label>Вікова категорія</label>
+              <select value={filters.rating} onChange={(e) => { setFilters({ ...filters, rating: e.target.value }); setPage(1); }}>
+                <option value="">Для будь-якого віку</option>
+                <option value="g">G (Усі вікові категорії)</option>
+                <option value="pg13">PG-13 (Для підлітків)</option>
+                <option value="r17">R-17 (Дорослі теми)</option>
+              </select>
+            </div>
+
             <div className="filter-group">
               <label>Відсортувати</label>
               <select value={localSort} onChange={(e) => setLocalSort(e.target.value)} style={{ borderLeft: '3px solid var(--neon-accent)' }}>
-                <option value="default">Тренд MAL (Оригінал)</option>
+                <option value="default">ТOП MAL (Оригінал)</option>
                 <optgroup label="За оцінкою">
                   <option value="rating_desc">Найкращі зверху (★)</option>
                   <option value="rating_asc">Найгірші зверху</option>
@@ -128,8 +140,8 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
               </select>
             </div>
             
-            {(filters.type || localSort !== 'default') && (
-              <button className="reset-filters-btn" onClick={() => { setFilters({ type: '' }); setLocalSort('default'); setPage(1); }}>
+            {(filters.type || filters.rating || localSort !== 'default') && (
+              <button className="reset-filters-btn" onClick={() => { setFilters({ type: '', rating: '' }); setLocalSort('default'); setPage(1); }}>
                 ✕ Скинути
               </button>
             )}
@@ -144,7 +156,7 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
           {finalDisplayedAnime.map((anime) => {
             const title = anime.title;
             const animeId = anime.id;
-            const localAnime = data.find(a => a.mal_id === String(animeId) || a.title === title);
+            const localAnime = data.find(a => String(a.mal_id) === String(animeId) || a.title === title);
 
             const handleAction = (actionType, value = '0.0') => {
               if (localAnime) {
@@ -152,6 +164,7 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
                 if (actionType === 'watched') onToggleWatched(localAnime.id);
                 if (actionType === 'planned') onTogglePlanned(localAnime.id);
                 if (actionType === 'rating') onUpdateRating(localAnime.id, value);
+                if (actionType === 'watching') onToggleWatching(localAnime.id);
               } else {
                 const newAnime = {
                   mal_id: String(animeId),
@@ -165,6 +178,7 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
                   status: anime.status || 'Unknown',
                   genres: anime.genres?.length > 0 ? anime.genres.join(', ') : 'Новинка',
                   isFavorite: actionType === 'favorite',
+                  isWatching: actionType === 'watching',
                   isWatched: actionType === 'watched',
                   planned: actionType === 'planned', 
                   userRating: actionType === 'rating' ? parseFloat(value || 0).toFixed(1) : '0.0',
@@ -188,11 +202,13 @@ const TopAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatched, onT
                 studio={anime.studio || 'Онгоїнг'}
                 genres={anime.genres?.length > 0 ? anime.genres.join(', ') : 'Різне'}
                 isFavorite={localAnime ? localAnime.isFavorite : false} 
+                isWatching={localAnime ? localAnime.isWatching : false}
                 isWatched={localAnime ? localAnime.isWatched : false}
                 planned={localAnime ? localAnime.planned : false}
                 userRating={localAnime ? localAnime.userRating : '0.0'}
                 isAddedByUser={false}
                 onToggleFavorite={() => handleAction('favorite')}
+                onToggleWatching={() => handleAction('watching')}
                 onToggleWatched={() => handleAction('watched')}
                 onTogglePlanned={() => handleAction('planned')}
                 onUpdateRating={(_, val) => handleAction('rating', val)}
