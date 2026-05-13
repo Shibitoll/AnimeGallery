@@ -17,6 +17,7 @@ import './styles/App.css';
 
 function App() {
   const [animeList, setAnimeList] = useState([]);
+  const [recommendedAnime, setRecommendedAnime] = useState([]); 
   const [currentTab, setCurrentTab] = useState('home');
   const [loading, setLoading] = useState(true);
 
@@ -30,34 +31,6 @@ function App() {
     commentsCount: 0
   });
 
-  const handleUpdateUser = async (updatedData) => {
-    // 1. Відразу оновлюємо візуально (Optimistic UI)
-    setCurrentUser(prev => ({ ...prev, ...updatedData }));
-
-    // 2. Відправляємо запит до бекенду
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/users/me/', {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          username: updatedData.name, // Django очікує поле 'username'
-          email: updatedData.email
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.error || "Не вдалося оновити профіль в базі даних");
-        // Якщо сталася помилка, можна було б відкотити зміни назад,
-        // але для простоти поки що просто повідомимо користувача
-      }
-    } catch (error) {
-      console.error("Помилка відправки даних профілю:", error);
-    }
-  };
-
-  const API_URL = 'http://127.0.0.1:8000/api/animes/';
-
   const getAuthHeaders = () => {
     const token = getAccessToken();
     return {
@@ -66,12 +39,33 @@ function App() {
     };
   };
 
+  const handleUpdateUser = async (updatedData) => {
+    setCurrentUser(prev => ({ ...prev, ...updatedData }));
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/users/me/', {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          username: updatedData.name, 
+          email: updatedData.email
+        })
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || "Не вдалося оновити профіль");
+      }
+    } catch (error) {
+      console.error("Помилка профілю:", error);
+    }
+  };
+
   const handleLoginSuccess = () => setIsAuthenticated(true);
 
   const handleLogout = () => {
     clearTokens();
     setIsAuthenticated(false);
     setAnimeList([]);
+    setRecommendedAnime([]);
     navigate('/login');
   };
 
@@ -83,72 +77,66 @@ function App() {
   const normalizeAnime = (data) => ({
     ...data,
     id: data.id,
-    mal_id: String(data.mal_id || data.id),
-    is_favorite: !!data.isFavorite,  
-    is_watching: !!data.isWatching,   // БЕРЕМО isFavorite ВІД DJANGO
-    in_watchlist: !!data.isWatched,     // БЕРЕМО isWatched ВІД DJANGO
+    anihubId: String(data.anihubId || data.anihub_id || data.id),
+    mal_id: String(data.mal_id || data.anihubId || data.anihub_id || data.id),
+    titleUkrainian: data.title_ukrainian || data.titleUkrainian || data.title,
+    is_favorite: !!(data.is_favorite || data.isFavorite),  
+    is_watching: !!(data.is_watching || data.isWatching),   
+    in_watchlist: !!(data.in_watchlist || data.isWatched),      
     planned: !!data.planned,
-    user_rating: data.userRating || 0,  // БЕРЕМО userRating ВІД DJANGO
-    is_added_by_user: !!data.isAddedByUser,
+    user_rating: parseFloat(data.user_rating || data.userRating || 0),  
+    is_added_by_user: !!(data.is_added_by_user || data.isAddedByUser),
+    episodesCount: parseInt(data.episodes_count || data.episodesCount || data.episodes || 0)
   });
 
   useEffect(() => {
     const fetchData = async () => {
       if (!isAuthenticated) {
         setAnimeList([]);
-        setCurrentUser({ name: "Гість", email: "", joinedDate: "", commentsCount: 0 }); // Скидаємо при виході
+        setRecommendedAnime([]);
+        setCurrentUser({ name: "Гість", email: "", joinedDate: "", commentsCount: 0 }); 
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-
-        // --- 1. ОТРИМУЄМО ДАНІ КОРИСТУВАЧА ---
+        // 1. Профіль
         try {
           const userRes = await fetch('http://127.0.0.1:8000/api/users/me/', { headers: getAuthHeaders() });
           if (userRes.ok) {
             const userData = await userRes.json();
-            setCurrentUser({
-              name: userData.username,
-              email: userData.email,
-              joinedDate: userData.joinedDate,
-              commentsCount: 0 // Залишаємо 0, поки не підключимо реальні коментарі
-            });
+            setCurrentUser({ name: userData.username, email: userData.email, joinedDate: userData.joinedDate, commentsCount: 0 });
           }
-        } catch (err) {
-          console.error("Не вдалося завантажити профіль:", err);
-        }
+        } catch (err) { console.error(err); }
 
-        // --- 2. ОТРИМУЄМО АНІМЕ ---
+        // 2. Рекомендації
+        try {
+          const recRes = await fetch('http://127.0.0.1:8000/api/animes/recommended/', { headers: getAuthHeaders() });
+          if (recRes.ok) {
+            const recData = await recRes.json();
+            setRecommendedAnime((recData.results || recData).map(normalizeAnime));
+          }
+        } catch (err) { console.error(err); }
+
+        // 3. Списки юзера
         let allAnime = [];
-        let nextPageUrl = API_URL;
-
+        let nextPageUrl = 'http://127.0.0.1:8000/api/animes/';
         while (nextPageUrl) {
           const response = await fetch(nextPageUrl, { headers: getAuthHeaders() });
-
-          if (response.status === 401) {
-             handleLogout();
-             throw new Error('Сесія закінчилась.');
-          }
-          if (!response.ok) throw new Error('Помилка мережі');
-          
-          const data = await response.json();
-          if (data.results) {
-            allAnime = [...allAnime, ...data.results.map(normalizeAnime)];
-          } else {
-            allAnime = data.map(normalizeAnime);
-          }
-          nextPageUrl = data.next || null;
+          if (response.status === 401) { handleLogout(); return; }
+          const resJson = await response.json();
+          const items = resJson.results || resJson;
+          allAnime = [...allAnime, ...items.map(normalizeAnime)];
+          nextPageUrl = resJson.next || null;
         }
         setAnimeList(allAnime);
       } catch (error) {
-        console.error("Помилка завантаження:", error);
+        console.error("Завантаження перервано:", error);
       } finally {
         setLoading(false);
       }
     };
-    
     fetchData();
   }, [isAuthenticated]);
 
@@ -158,151 +146,108 @@ function App() {
 
     if (typeof animeOrId === 'object' && animeOrId !== null) {
       animeData = normalizeAnime(animeOrId);
-      existingAnime = animeList.find(a => 
-        String(a.id) === String(animeData.id) || String(a.mal_id) === String(animeData.mal_id)
-      );
+      existingAnime = animeList.find(a => String(a.anihubId) === String(animeData.anihubId));
     } else {
-      existingAnime = animeList.find(a => String(a.id) === String(animeOrId) || String(a.mal_id) === String(animeOrId));
+      existingAnime = animeList.find(a => String(a.id) === String(animeOrId) || String(a.anihubId) === String(animeOrId));
       if (!existingAnime) return;
       animeData = existingAnime;
     }
 
+    const API_URL = 'http://127.0.0.1:8000/api/animes/';
+    
+    // Перетворення ключів для Django
+    const djangoPayload = { ...statusUpdates };
+    if (statusUpdates.isFavorite !== undefined) djangoPayload.is_favorite = statusUpdates.isFavorite;
+    if (statusUpdates.isWatching !== undefined) djangoPayload.is_watching = statusUpdates.isWatching;
+    if (statusUpdates.isWatched !== undefined) djangoPayload.in_watchlist = statusUpdates.isWatched;
+    if (statusUpdates.userRating !== undefined) djangoPayload.user_rating = statusUpdates.userRating;
+
     if (existingAnime) {
-      // PATCH-запит (якщо аніме вже в базі)
       try {
         const response = await fetch(`${API_URL}${existingAnime.id}/`, {
           method: 'PATCH',
           headers: getAuthHeaders(),
-          body: JSON.stringify(statusUpdates) // Django очікує camelCase!
+          body: JSON.stringify(djangoPayload) 
         });
         if (response.ok) {
           const updated = normalizeAnime(await response.json());
           setAnimeList(prev => prev.map(a => a.id === existingAnime.id ? updated : a));
+          setRecommendedAnime(prev => prev.map(a => a.anihubId === updated.anihubId ? updated : a));
         }
-      } catch (error) { console.error("Помилка оновлення:", error); }
+      } catch (error) { console.error(error); }
     } else {
-      // POST-запит (якщо це нове аніме з вкладки Популярні)
-      let parsedGenres = "Невідомо";
-      if (Array.isArray(animeData.genres)) {
-        parsedGenres = animeData.genres.map(g => typeof g === 'object' ? (g.name || '') : g).join(', ');
-      } else if (animeData.genres) parsedGenres = animeData.genres;
-      if (parsedGenres.length > 255) parsedGenres = parsedGenres.substring(0, 250) + "...";
-
-      const newAnimePayload = {
-        title: animeData.title || "Без назви",
-        mal_id: String(animeData.mal_id), 
+      const newPayload = {
+        titleUkrainian: animeData.titleUkrainian || animeData.title || "Без назви",
+        anihubId: String(animeData.anihubId),
+        mal_id: String(animeData.mal_id || animeData.anihubId), 
         description: animeData.description || "Опис відсутній",
-        poster: animeData.poster || "https://via.placeholder.com/225x318",
-        genres: parsedGenres,
+        poster: animeData.poster || animeData.image || "https://via.placeholder.com/225x318",
+        genres: Array.isArray(animeData.genres) ? animeData.genres.join(', ') : String(animeData.genres || ""),
         year: String(animeData.year || "-").substring(0, 4),
-        episodes: String(animeData.episodes || "-"),
-        studio: animeData.studio || "Невідомо",
-        rating: parseFloat(animeData.rating) || 0.0,
-        userRating: 0.0, 
-        isFavorite: false, 
-        isWatching: false,
-        isWatched: false, 
-        planned: false,
-        isAddedByUser: false,
-        ...statusUpdates // Передаємо статус у правильному форматі
+        episodesCount: parseInt(animeData.episodesCount || 0),
+        type: animeData.type || "tv",
+        status: animeData.status || "completed",
+        rating: parseFloat(animeData.rating || 0),
+        is_favorite: !!statusUpdates.isFavorite, 
+        is_watching: !!statusUpdates.isWatching,
+        in_watchlist: !!statusUpdates.isWatched, 
+        planned: !!statusUpdates.planned,
+        user_rating: parseFloat(statusUpdates.userRating || 0),
       };
 
       try {
         const response = await fetch(API_URL, {
           method: 'POST',
           headers: getAuthHeaders(),
-          body: JSON.stringify(newAnimePayload)
+          body: JSON.stringify(newPayload)
         });
         if (response.ok) {
-          const savedAnime = normalizeAnime(await response.json());
-          setAnimeList(prev => [savedAnime, ...prev]);
+          const saved = normalizeAnime(await response.json());
+          setAnimeList(prev => [saved, ...prev]);
+          setRecommendedAnime(prev => prev.map(a => a.anihubId === saved.anihubId ? saved : a));
         }
-      } catch (error) { console.error("Помилка створення:", error); }
+      } catch (error) { console.error(error); }
     }
   };
 
-  const getAnimeId = (data) => typeof data === 'object' ? (data.mal_id || data.id) : data;
-
-  const toggleFavorite = (data) => {
-    const id = getAnimeId(data);
-    const existing = animeList.find(a => String(a.id) === String(id) || String(a.mal_id) === String(id));
-    const newStatus = existing ? !existing.is_favorite : true;
-    updateAnimeStatus(data, { isFavorite: newStatus });
+  const toggleFavorite = (d) => {
+    const id = typeof d === 'object' ? (d.anihubId || d.mal_id || d.id) : d;
+    const ex = animeList.find(a => String(a.anihubId) === String(id) || String(a.id) === String(id));
+    updateAnimeStatus(d, { isFavorite: ex ? !ex.is_favorite : true });
   };
 
-  const toggleWatching = (data) => {
-    const id = getAnimeId(data);
-    const existing = animeList.find(a => String(a.id) === String(id) || String(a.mal_id) === String(id));
-    const newStatus = existing ? !existing.is_watching : true;
-    updateAnimeStatus(data, { 
-      isWatching: newStatus,
-      ...(newStatus ? { planned: false, isWatched: false } : {})
-    });
+  const toggleWatching = (d) => {
+    const id = typeof d === 'object' ? (d.anihubId || d.mal_id || d.id) : d;
+    const ex = animeList.find(a => String(a.anihubId) === String(id) || String(a.id) === String(id));
+    const s = ex ? !ex.is_watching : true;
+    updateAnimeStatus(d, { isWatching: s, isWatched: false, planned: false });
   };
 
-  const toggleWatched = (data) => {
-    const id = getAnimeId(data);
-    const existing = animeList.find(a => String(a.id) === String(id) || String(a.mal_id) === String(id));
-    const newStatus = existing ? !existing.in_watchlist : true;
-    updateAnimeStatus(data, { 
-      isWatched: newStatus,
-      ...(newStatus ? { isWatching: false, planned: false } : {})
-    });
+  const toggleWatched = (d) => {
+    const id = typeof d === 'object' ? (d.anihubId || d.mal_id || d.id) : d;
+    const ex = animeList.find(a => String(a.anihubId) === String(id) || String(a.id) === String(id));
+    const s = ex ? !ex.in_watchlist : true;
+    updateAnimeStatus(d, { isWatched: s, isWatching: false, planned: false });
   };
 
-  const togglePlanned = (data) => {
-    const id = getAnimeId(data);
-    const existing = animeList.find(a => String(a.id) === String(id) || String(a.mal_id) === String(id));
-    const newStatus = existing ? !existing.planned : true;
-    updateAnimeStatus(data, { 
-      planned: newStatus,
-      ...(newStatus ? { isWatching: false, isWatched: false } : {})
-    });
+  const togglePlanned = (d) => {
+    const id = typeof d === 'object' ? (d.anihubId || d.mal_id || d.id) : d;
+    const ex = animeList.find(a => String(a.anihubId) === String(id) || String(a.id) === String(id));
+    const s = ex ? !ex.planned : true;
+    updateAnimeStatus(d, { planned: s, isWatching: false, isWatched: false });
   };
 
-  const updateRating = (data, newRating) => {
-    updateAnimeStatus(data, { userRating: newRating }); // Відправляємо userRating
-  };
-
-  const addAnime = async (newAnime) => {
-    const isFromJikan = !!(newAnime.mal_id || newAnime.id); 
-    const animeDataToSend = {
-      ...newAnime,
-      isAddedByUser: newAnime.is_added_by_user !== undefined ? newAnime.is_added_by_user : !isFromJikan 
-    };
-    
-    delete animeDataToSend.is_added_by_user;
-    delete animeDataToSend.is_favorite;
-    delete animeDataToSend.in_watchlist;
-    delete animeDataToSend.user_rating;
-
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(animeDataToSend)
-      });
-      
-      if (response.ok) {
-        const savedAnime = normalizeAnime(await response.json());
-        setAnimeList(prev => [savedAnime, ...prev]);
-      }
-    } catch (error) {
-      console.error("Помилка при додаванні:", error);
-    }
-  };
+  const updateRating = (d, r) => updateAnimeStatus(d, { userRating: r });
 
   const deleteAnime = async (id) => {
-    if (!window.confirm("Видалити це аніме з вашого списку?")) return;
+    if (!window.confirm("Видалити?")) return;
     try {
-      const response = await fetch(`${API_URL}${id}/`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-      if (response.ok) setAnimeList(prev => prev.filter(a => a.id !== id));
-    } catch (error) {
-      console.error("Помилка видалення:", error);
-    }
+      const response = await fetch(`http://127.0.0.1:8000/api/animes/${id}/`, { method: 'DELETE', headers: getAuthHeaders() });
+      if (response.ok) {
+        setAnimeList(prev => prev.filter(a => a.id !== id));
+        setRecommendedAnime(prev => prev.map(a => a.id === id ? { ...a, is_favorite: false, is_watching: false, in_watchlist: false, planned: false, user_rating: 0 } : a));
+      }
+    } catch (error) { console.error(error); }
   };
 
   if (loading) return <div className="loading">Завантаження...</div>;
@@ -313,48 +258,28 @@ function App() {
       <div className="app-wrapper">
         <Header 
           favoriteCount={animeList.filter(a => a.is_favorite).length} 
-          watchingCount={animeList.filter(a => a.isWatching).length}
+          watchingCount={animeList.filter(a => a.is_watching).length}
           watchedCount={animeList.filter(a => a.in_watchlist).length}
           plannedCount={animeList.filter(a => a.planned).length}
-          currentTab={currentTab} 
-          setCurrentTab={setCurrentTab} 
-          isAuthenticated={isAuthenticated}
-          onLogout={handleLogout}
-          userName={currentUser.name}
+          currentTab={currentTab} setCurrentTab={setCurrentTab} isAuthenticated={isAuthenticated} onLogout={handleLogout} userName={currentUser.name}
         />
-        
         <Routes>
           <Route path="/login" element={<Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/register" element={<Register onNavigate={handleNavigate} />} />
-
-          <Route path="/" element={<Main data={animeList} currentTab="home" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={addAnime} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
-          <Route path="/popular" element={<Main data={animeList} currentTab="popular" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={addAnime} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
-          <Route path="/new" element={<Main data={animeList} currentTab="new" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={addAnime} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
-          <Route path="/favorite" element={<Main data={animeList} currentTab="favorite" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={addAnime} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
-          <Route path="/watching" element={<Main data={animeList} currentTab="watching" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={addAnime} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
-          <Route path="/watched" element={<Main data={animeList} currentTab="watched" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={addAnime} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
-          <Route path="/planned" element={<Main data={animeList} currentTab="planned" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={addAnime} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
-          <Route path="/my-anime" element={<Main data={animeList} currentTab="my-anime" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={addAnime} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
+          <Route path="/" element={<Main data={animeList} recommendedData={recommendedAnime} currentTab="home" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={(n) => updateAnimeStatus(n, {})} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
+          <Route path="/popular" element={<Main data={animeList} currentTab="popular" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={(n) => updateAnimeStatus(n, {})} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
+          <Route path="/new" element={<Main data={animeList} currentTab="new" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={(n) => updateAnimeStatus(n, {})} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
+          <Route path="/favorite" element={<Main data={animeList} currentTab="favorite" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
+          <Route path="/watching" element={<Main data={animeList} currentTab="watching" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
+          <Route path="/watched" element={<Main data={animeList} currentTab="watched" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
+          <Route path="/planned" element={<Main data={animeList} currentTab="planned" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
+          <Route path="/my-anime" element={<Main data={animeList} currentTab="my-anime" toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onAddAnime={(n) => updateAnimeStatus(n, {})} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
           <Route path="/about" element={<About />} />
-          
-          <Route path="/anime/:id" element={<AnimeDetails data={animeList} onAddAnime={addAnime} onToggleFavorite={toggleFavorite} onToggleWatching={toggleWatching} onToggleWatched={toggleWatched} onTogglePlanned={togglePlanned} onUpdateRating={updateRating} />} />
-          <Route path="/search" element={<Search data={animeList} onAddAnime={addAnime} onToggleFavorite={toggleFavorite} onToggleWatching={toggleWatching} onToggleWatched={toggleWatched} onTogglePlanned={togglePlanned} onUpdateRating={updateRating} />} />
-          <Route path="/profile" element={
-            <Profile 
-              data={animeList} 
-              userInfo={currentUser}
-              onUpdateUser={handleUpdateUser}
-              toggleFavorite={toggleFavorite} 
-              toggleWatching={toggleWatching} 
-              toggleWatched={toggleWatched} 
-              togglePlanned={togglePlanned} 
-              onDeleteAnime={deleteAnime} 
-              onUpdateRating={updateRating} 
-            />
-          } />
+          <Route path="/anime/:id" element={<AnimeDetails data={animeList} onAddAnime={(n) => updateAnimeStatus(n, {})} onToggleFavorite={toggleFavorite} onToggleWatching={toggleWatching} onToggleWatched={toggleWatched} onTogglePlanned={togglePlanned} onUpdateRating={updateRating} />} />
+          <Route path="/search" element={<Search data={animeList} onAddAnime={(n) => updateAnimeStatus(n, {})} onToggleFavorite={toggleFavorite} onToggleWatching={toggleWatching} onToggleWatched={toggleWatched} onTogglePlanned={togglePlanned} onUpdateRating={updateRating} />} />
+          <Route path="/profile" element={<Profile data={animeList} userInfo={currentUser} onUpdateUser={handleUpdateUser} toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        
         <Footer />
       </div>
     </ThemeProvider>

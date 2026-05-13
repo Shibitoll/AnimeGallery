@@ -59,7 +59,7 @@ const About = () => {
           <span className="tech-tag react">⚛️ React 18</span>
           <span className="tech-tag django">🐍 Django REST Framework</span>
           <span className="tech-tag sqlite">🗄️ SQLite</span>
-          <span className="tech-tag api">🌐 Jikan API v4</span>
+          <span className="tech-tag api">🌐 AniHub API</span>
           <span className="tech-tag ui">🎨 CSS Flexbox/Grid</span>
         </div>
       </div>

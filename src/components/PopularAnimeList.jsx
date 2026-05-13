@@ -1,34 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import AnimeCard from './AnimeCard';
+import { streamingApi } from '../api/streamingApi';
 
-const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatching, onToggleWatched, onTogglePlanned, onUpdateRating, isHomePage }) => {
+const PopularAnimeList = ({ 
+  data, 
+  onToggleFavorite, 
+  onToggleWatching, 
+  onToggleWatched, 
+  onTogglePlanned, 
+  onUpdateRating, 
+  isHomePage 
+}) => {
   const [popular, setPopular] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
 
-  // Фільтри, які йдуть на бекенд (щоб отримувати правильні сторінки)
-  const [filters, setFilters] = useState({ type: '', rating: '' });
-  
-  // ВИКЛЮЧНО ФРОНТЕНД-СОРТУВАННЯ
+  // Фільтри (AniHub підтримує 'type')
+  const [filters, setFilters] = useState({ type: '' });
   const [localSort, setLocalSort] = useState('default');
 
   useEffect(() => {
     const fetchPopular = async () => {
       try {
         setIsLoading(true);
-        let apiUrl = `http://localhost:8000/api/streaming/popular/?page=${page}`;
-        if (filters.type) apiUrl += `&type=${filters.type}`;
-        if (filters.rating) apiUrl += `&rating=${filters.rating}`;
-
-        const response = await fetch(apiUrl);
-        const result = await response.json();
+        // Запит через Django-проксі до AniHub API
+        const result = await streamingApi.getPopular(page, filters.type);
         
-        const animeList = result.results || [];
-        setHasNextPage(result.hasNextPage || false);
-        setTotalPages(result.totalPages || 1);
+        const animeList = result.items || [];
+        
+        // Розрахунок пагінації (total / page_size)
+        const total = result.total || 0;
+        const pageSize = result.page_size || 20;
+        const calcTotalPages = Math.ceil(total / pageSize);
 
+        setTotalPages(calcTotalPages || 1);
+        setHasNextPage(page < calcTotalPages);
+
+        // Усунення дублікатів за ID
         const uniqueAnime = Array.from(new Map(animeList.map(item => [item.id, item])).values());
         setPopular(uniqueAnime); 
       } catch (err) {
@@ -38,7 +48,7 @@ const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatching
       }
     };
     fetchPopular();
-  }, [page, filters]);
+  }, [page, filters.type]);
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
@@ -59,27 +69,21 @@ const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatching
     let sorted = [...animeArray];
     switch (localSort) {
       case 'title_asc':
-        return sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+        return sorted.sort((a, b) => (a.title_ukrainian || '').localeCompare(b.title_ukrainian || ''));
       case 'title_desc':
-        return sorted.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
+        return sorted.sort((a, b) => (b.title_ukrainian || '').localeCompare(a.title_ukrainian || ''));
       case 'rating_desc':
         return sorted.sort((a, b) => parseFloat(b.rating || 0) - parseFloat(a.rating || 0));
       case 'rating_asc':
         return sorted.sort((a, b) => parseFloat(a.rating || 0) - parseFloat(b.rating || 0));
       case 'year_desc':
         return sorted.sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
-      case 'year_asc': // Якщо року немає, кидаємо в кінець (9999)
+      case 'year_asc':
         return sorted.sort((a, b) => (parseInt(a.year) || 9999) - (parseInt(b.year) || 9999));
       case 'episodes_desc':
-        return sorted.sort((a, b) => (parseInt(b.episodes) || 0) - (parseInt(a.episodes) || 0));
-      case 'episodes_asc':
-        return sorted.sort((a, b) => {
-          const epA = parseInt(a.episodes) || 9999;
-          const epB = parseInt(b.episodes) || 9999;
-          return epA - epB;
-        });
+        return sorted.sort((a, b) => (parseInt(b.episodes_count) || 0) - (parseInt(a.episodes_count) || 0));
       default:
-        return sorted; // 'default' — зберігаємо порядок, як віддав API
+        return sorted;
     }
   };
 
@@ -88,11 +92,10 @@ const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatching
 
   return (
     <div className="api-section">
-      
       {!isHomePage && (
         <div className="section-header">
           <h2 className="gallery-title" style={{ marginTop: 'var(--space-lg)', color: 'var(--text-primary)' }}>
-            Найпопулярніші аніме у світі
+            Популярні аніме (Українською)
           </h2>
 
           <div className="filters-container" style={{ marginBottom: '30px', justifyContent: 'flex-start' }}>
@@ -100,48 +103,24 @@ const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatching
               <label>Формат випуску</label>
               <select value={filters.type} onChange={(e) => { setFilters({...filters, type: e.target.value}); setPage(1); }}>
                 <option value="">Усі формати</option>
-                <option value="tv">TV-серіал (ТБ)</option>
-                <option value="movie">Повнометражний фільм</option>
+                <option value="tv">TV-серіал</option>
+                <option value="movie">Фільм</option>
                 <option value="ova">OVA / ONA</option>
               </select>
             </div>
 
             <div className="filter-group">
-              <label>Вікова категорія</label>
-              <select value={filters.rating} onChange={(e) => { setFilters({...filters, rating: e.target.value}); setPage(1); }}>
-                <option value="">Для будь-якого віку</option>
-                <option value="g">G (Усі вікові категорії)</option>
-                <option value="pg13">PG-13 (Для підлітків)</option>
-                <option value="r17">R-17 (Дорослі теми)</option>
-              </select>
-            </div>
-
-            {/* МЕНЮ ФРОНТЕНД-СОРТУВАННЯ */}
-            <div className="filter-group">
               <label>Відсортувати</label>
               <select value={localSort} onChange={(e) => setLocalSort(e.target.value)} style={{ borderLeft: '3px solid var(--neon-accent)' }}>
-                <option value="default">ТОП MAL (Оригінал)</option>
-                <optgroup label="За оцінкою">
-                  <option value="rating_desc">Найкращі зверху (★)</option>
-                  <option value="rating_asc">Найгірші зверху</option>
-                </optgroup>
-                <optgroup label="За алфавітом">
-                  <option value="title_asc">А-Я (A-Z)</option>
-                  <option value="title_desc">Я-А (Z-A)</option>
-                </optgroup>
-                <optgroup label="За датою">
-                  <option value="year_desc">Найновіші спочатку</option>
-                  <option value="year_asc">Найстаріші спочатку</option>
-                </optgroup>
-                <optgroup label="За тривалістю">
-                  <option value="episodes_desc">Найдовші (багато серій)</option>
-                  <option value="episodes_asc">Найкоротші</option>
-                </optgroup>
+                <option value="default">Рейтинг AniHub</option>
+                <option value="rating_desc">Найкращі ★</option>
+                <option value="title_asc">А-Я</option>
+                <option value="year_desc">Новинки</option>
               </select>
             </div>
 
-            {(filters.type || filters.rating || localSort !== 'default') && (
-              <button className="reset-filters-btn" onClick={() => { setFilters({ type: '', rating: '' }); setLocalSort('default'); setPage(1); }}>
+            {(filters.type || localSort !== 'default') && (
+              <button className="reset-filters-btn" onClick={() => { setFilters({ type: '' }); setLocalSort('default'); setPage(1); }}>
                 ✕ Скинути
               </button>
             )}
@@ -154,59 +133,45 @@ const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatching
       ) : (
         <div className="anime-grid">
           {finalDisplayedAnime.map((anime) => {
-            const title = anime.title;
             const animeId = anime.id;
-            const localAnime = data.find(a => a.mal_id === String(animeId) || a.title === title);
+            const title = anime.title_ukrainian || anime.title_english || anime.title_original;
+            
+            // Синхронізація з локальною базою за anihubId
+            const localAnime = data.find(a => String(a.anihubId) === String(animeId));
 
             const handleAction = (actionType, value = '0.0') => {
-              if (localAnime) {
-                if (actionType === 'favorite') onToggleFavorite(localAnime.id);
-                if (actionType === 'watched') onToggleWatched(localAnime.id);
-                if (actionType === 'planned') onTogglePlanned(localAnime.id);
-                if (actionType === 'rating') onUpdateRating(localAnime.id, value);
-                if (actionType === 'watching') onToggleWatching(localAnime.id);
-              } else {
-                const newAnime = {
-                  mal_id: String(animeId),
-                  title: title || 'Без назви',
-                  poster: anime.image || 'https://via.placeholder.com/225x320?text=No+Image',
-                  rating: anime.rating ? parseFloat(anime.rating).toFixed(1) : '0.0',
-                  description: anime.description || "Опис доступний на сторінці перегляду.",
-                  year: String(anime.year || new Date().getFullYear()),
-                  episodes: String(anime.episodes || 0),
-                  studio: Array.isArray(anime.studio) ? anime.studio.join(', ') : (anime.studio || 'Популярне'),
-                  status: anime.status || 'Unknown',
-                  genres: anime.genres?.length > 0 ? anime.genres.join(', ') : 'Популярне',
-                  isFavorite: actionType === 'favorite',
-                  isWatching: actionType === 'watching',
-                  isWatched: actionType === 'watched',
-                  planned: actionType === 'planned', 
-                  userRating: actionType === 'rating' ? parseFloat(value || 0).toFixed(1) : '0.0',
-                  isAddedByUser: false
-                };
-                onAddAnime(newAnime);
-              }
+              // Формуємо payload: беремо дані з бази або створюємо нові з API
+              const animeData = localAnime || {
+                anihubId: animeId,
+                titleUkrainian: title,
+                poster: anime.poster_url,
+                rating: anime.rating || '0.0',
+                year: anime.year,
+                episodesCount: anime.episodes_count || 0,
+                genres: anime.genres || [],
+                description: anime.description_uk || anime.description || ""
+              };
+
+              // Викликаємо відповідну дію (App.jsx автоматично зробить POST або PATCH)
+              if (actionType === 'favorite') onToggleFavorite(animeData);
+              if (actionType === 'watching') onToggleWatching(animeData);
+              if (actionType === 'watched') onToggleWatched(animeData);
+              if (actionType === 'planned') onTogglePlanned(animeData);
+              if (actionType === 'rating') onUpdateRating(animeData, value);
             };
 
             return (
               <AnimeCard 
                 key={`pop-${animeId}`}
-                id={localAnime ? localAnime.id : animeId}
-                mal_id={animeId}
-                title={title}
-                poster={anime.image}
+                // Передаємо всі локальні статуси (is_favorite тощо), якщо аніме вже в базі
+                {...(localAnime ? localAnime : {})}
+                anihubId={animeId}
+                titleUkrainian={title}
+                poster_url={anime.poster_url}
                 rating={anime.rating}
-                description={''}
-                year={anime.year || 'N/A'}
-                episodes={anime.episodes || 0}
-                studio={anime.studio || 'Популярне'}
-                genres={anime.genres?.length > 0 ? anime.genres.join(', ') : 'Популярне'}
-                isFavorite={localAnime ? localAnime.isFavorite : false}
-                isWatching={localAnime ? localAnime.isWatching : false}
-                isWatched={localAnime ? localAnime.isWatched : false}
-                planned={localAnime ? localAnime.planned : false}
-                userRating={localAnime ? localAnime.userRating : '0.0'}
-                isAddedByUser={false}
+                year={anime.year}
+                episodesCount={anime.episodes_count}
+                genres={anime.genres}
                 onToggleFavorite={() => handleAction('favorite')}
                 onToggleWatching={() => handleAction('watching')}
                 onToggleWatched={() => handleAction('watched')}
@@ -220,15 +185,15 @@ const PopularAnimeList = ({ data, onAddAnime, onToggleFavorite, onToggleWatching
 
       {!isHomePage && !isLoading && totalPages > 1 && (
         <div className="pagination-container">
-          <button className="page-btn" disabled={page === 1} onClick={() => handlePageChange(1)} title="Перша">&laquo;</button>
+          <button className="page-btn" disabled={page === 1} onClick={() => handlePageChange(1)}>&laquo;</button>
           <button className="page-btn" disabled={page === 1} onClick={() => handlePageChange(page - 1)}>&larr; Назад</button>
           <div className="page-numbers">
             {getPageNumbers().map(num => (
               <button key={num} className={`num-btn ${page === num ? 'active' : ''}`} onClick={() => handlePageChange(num)}>{num}</button>
             ))}
           </div>
-          <button className="page-btn" disabled={page === totalPages || !hasNextPage} onClick={() => handlePageChange(page + 1)}>Вперед &rarr;</button>
-          <button className="page-btn" disabled={page === totalPages || !hasNextPage} onClick={() => handlePageChange(totalPages)} title="Остання">&raquo;</button>
+          <button className="page-btn" disabled={!hasNextPage} onClick={() => handlePageChange(page + 1)}>Вперед &rarr;</button>
+          <button className="page-btn" disabled={!hasNextPage} onClick={() => handlePageChange(totalPages)}>&raquo;</button>
         </div>
       )}
     </div>

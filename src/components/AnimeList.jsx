@@ -2,36 +2,24 @@ import React, { useState } from 'react';
 import AnimeCard from './AnimeCard';
 
 /**
- * Компонент-список для відображення сітки аніме-карток.
- * Приймає масив даних та функції зворотного виклику, які передаються 
- * у кожен компонент AnimeCard для взаємодії з API.
- * * @component
- * @param {Object} props - Властивості компонента.
- * @param {Array<Object>} props.list - Масив об'єктів аніме, отриманих з бекенду.
- * @param {Function} props.onToggleFavorite - Функція для перемикання статусу "улюблене".
- * @param {Function} props.onToggleWatched - Функція для перемикання статусу "переглянуто".
- * @param {Function} props.onDeleteAnime - Функція для видалення аніме з бази даних.
- * @param {Function} props.onUpdateRating - Функція для оновлення рейтингу користувача.
- * @returns {JSX.Element} Сітка з картками аніме або повідомлення про завантаження.
+ * Компонент-список для відображення сітки збережених аніме-карток.
+ * @component
  */
-const AnimeList = ({ list, onToggleFavorite, onToggleWatching, onToggleWatched, onDeleteAnime, onUpdateRating }) => {
+const AnimeList = ({ list, onToggleFavorite, onToggleWatching, onToggleWatched, onTogglePlanned, onDeleteAnime, onUpdateRating }) => {
   
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12; // Скільки карток показувати на одній сторінці
+  const itemsPerPage = 12;
 
   if (!list || list.length === 0) {
-    return <p className="empty-message">Завантаження...</p>;
+    return <p className="empty-message">Список порожній.</p>;
   }
 
-  // Математика пагінації
   const totalPages = Math.ceil(list.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  // Вирізаємо потрібний шматок масиву для відображення
   const currentItems = list.slice(startIndex, startIndex + itemsPerPage);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    // Плавна прокрутка сторінки вгору при перемиканні
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -49,20 +37,22 @@ const AnimeList = ({ list, onToggleFavorite, onToggleWatching, onToggleWatched, 
   return (
     <div className="anime-list-wrapper">
       <div className="anime-grid">
-        {currentItems.map(anime => (
+        {/* ВИПРАВЛЕНО: Додано index та надійний key */}
+        {currentItems.map((anime, index) => (
           <AnimeCard 
-              key={anime.id}
+              key={anime.id || anime.anihubId || anime.mal_id || `anime-${index}`}
               {...anime}
               onToggleFavorite={onToggleFavorite} 
               onToggleWatching={onToggleWatching}
               onToggleWatched={onToggleWatched}
+              onTogglePlanned={onTogglePlanned}
               isAddedByUser={anime.isAddedByUser}
               onDeleteAnime={onDeleteAnime}
               onUpdateRating={onUpdateRating}
           />
       ))}
     </div>
-{totalPages > 1 && (
+    {totalPages > 1 && (
         <div className="pagination-container">
           <button className="page-btn" disabled={currentPage === 1} onClick={() => handlePageChange(1)}>&laquo;</button>
           <button className="page-btn" disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>&larr;</button>

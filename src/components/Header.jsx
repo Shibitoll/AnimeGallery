@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { streamingApi } from '../api/streamingApi'; 
 
 const Header = ({ favoriteCount, watchingCount, watchedCount, plannedCount, currentTab, setCurrentTab, isAuthenticated, onLogout, userName }) => {
     const { theme, toggleTheme } = useTheme();
@@ -29,6 +30,7 @@ const Header = ({ favoriteCount, watchingCount, watchedCount, plannedCount, curr
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // БЕЗПЕЧНИЙ ЖИВИЙ ПОШУК ЧЕРЕЗ ПРОКСІ
     useEffect(() => {
         if (searchInput.trim().length < 3) {
             setSuggestions([]);
@@ -40,13 +42,15 @@ const Header = ({ favoriteCount, watchingCount, watchedCount, plannedCount, curr
             setIsSearching(true);
             setShowSuggestions(true);
             try {
-                const response = await fetch(`http://localhost:8000/api/streaming/search/?q=${encodeURIComponent(searchInput.trim())}`);
-                const data = await response.json();
-                if (data.results) {
-                    setSuggestions(data.results.slice(0, 5)); 
-                }
+                // Використовуємо оновлений, надійний API-клієнт
+                const response = await streamingApi.searchAnime(searchInput.trim());
+                
+                // Гнучке парсування результатів (на випадок змін у бекенді)
+                const items = response?.items || response?.results || (Array.isArray(response) ? response : []);
+                setSuggestions(items.slice(0, 5)); 
             } catch (error) {
-                console.error("Помилка живого пошуку:", error);
+                console.error("Помилка живого пошуку в хедері:", error);
+                setSuggestions([]); // Якщо помилка - просто показуємо, що нічого не знайдено, без крашу
             } finally {
                 setIsSearching(false);
             }
@@ -67,7 +71,7 @@ const Header = ({ favoriteCount, watchingCount, watchedCount, plannedCount, curr
         if (e) e.preventDefault();
         if (searchInput.trim()) {
             navigate(`/search?q=${encodeURIComponent(searchInput.trim())}`);
-            setCurrentTab('search');
+            if (setCurrentTab) setCurrentTab('search');
             setShowSuggestions(false);
         }
     };
@@ -78,7 +82,6 @@ const Header = ({ favoriteCount, watchingCount, watchedCount, plannedCount, curr
         setShowSuggestions(false);
     };
     
-    // ДОДАНО: Логіка для виходу
     const handleUserLogout = () => {
         setIsDropdownOpen(false);
         if (onLogout) onLogout();
@@ -108,7 +111,8 @@ const Header = ({ favoriteCount, watchingCount, watchedCount, plannedCount, curr
                 <div className="header-actions">
                     
                     {/* БЛОК ПОШУКУ */}
-                    <div className="search-container" ref={searchRef}>
+                    {/* БЛОК ПОШУКУ */}
+                    <div className="search-container" ref={searchRef} style={{ position: 'relative' }}>
                         <form className="search-form" onSubmit={handleSearchSubmit}>
                             <input 
                                 type="text" 
@@ -123,30 +127,35 @@ const Header = ({ favoriteCount, watchingCount, watchedCount, plannedCount, curr
 
                         {/* ВИПАДАЮЧИЙ СПИСОК ПІДКАЗОК */}
                         {showSuggestions && searchInput.trim().length >= 3 && (
-                            <div className="suggestions-dropdown">
+                            <div className="suggestions-dropdown" style={{ position: 'absolute', top: '100%', left: 0, width: '100%', zIndex: 1000, marginTop: '8px', background: 'var(--surface-card, #1e293b)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}>
                                 {isSearching ? (
                                     <div className="suggestions-loading">Шукаємо... ⏳</div>
                                 ) : suggestions.length > 0 ? (
                                     <>
-                                        {suggestions.map(anime => (
-                                            <div 
-                                                key={anime.id} 
-                                                className="suggestion-item"
-                                                onClick={() => handleSuggestionClick(anime.id)}
-                                            >
-                                                <img 
-                                                    src={anime.image || 'https://via.placeholder.com/40x60?text=No+Image'} 
-                                                    alt={anime.title} 
-                                                    className="suggestion-img"
-                                                />
-                                                <div className="suggestion-info">
-                                                    <span className="suggestion-title">{anime.title}</span>
-                                                    <span className="suggestion-meta">
-                                                        {anime.year} • ★ {anime.rating ? parseFloat(anime.rating).toFixed(1) : 'N/A'}
-                                                    </span>
+                                        {suggestions.map(anime => {
+                                            const displayTitle = anime.title_ukrainian || anime.title_english || anime.title_original || anime.title;
+                                            const poster = anime.poster_url || anime.image || anime.poster;
+                                            
+                                            return (
+                                                <div 
+                                                    key={`header-sugg-${anime.id}`} 
+                                                    className="suggestion-item"
+                                                    onClick={() => handleSuggestionClick(anime.id)}
+                                                >
+                                                    <img 
+                                                        src={poster || 'https://via.placeholder.com/40x60?text=No+Image'} 
+                                                        alt={displayTitle} 
+                                                        className="suggestion-img"
+                                                    />
+                                                    <div className="suggestion-info">
+                                                        <span className="suggestion-title">{displayTitle}</span>
+                                                        <span className="suggestion-meta">
+                                                            {anime.year || 'N/A'} • ★ {anime.rating ? parseFloat(anime.rating).toFixed(1) : '0.0'}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                         <button className="suggestion-view-all" onClick={handleSearchSubmit}>
                                             Всі результати для "{searchInput}" &rarr;
                                         </button>
@@ -158,7 +167,7 @@ const Header = ({ favoriteCount, watchingCount, watchedCount, plannedCount, curr
                         )}
                     </div>
 
-                    {/* ДОДАНО: Перевірка авторизації */}
+                    {/* БЛОК АВТОРИЗАЦІЇ */}
                     {isAuthenticated ? (
                         <>
                             <NavLink 
@@ -175,7 +184,6 @@ const Header = ({ favoriteCount, watchingCount, watchedCount, plannedCount, curr
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 >
                                     <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${userName || 'User'}`} alt="Avatar" className="user-avatar" />
-                                    {/* ‼️ ТУТ ТЕПЕР ВІДОБРАЖАЄТЬСЯ ІМ'Я КОРИСТУВАЧА ‼️ */}
                                     <span className="user-name">{userName || 'Мій профіль'}</span>
                                     <span className="dropdown-arrow">▼</span>
                                 </button>
@@ -227,8 +235,8 @@ const Header = ({ favoriteCount, watchingCount, watchedCount, plannedCount, curr
                         </>
                     ) : (
                         <div className="auth-buttons">
-                            <button className="login-btn" onClick={() => { navigate('/login'); setCurrentTab(''); }}>Увійти</button>
-                            <button className="register-btn" onClick={() => { navigate('/register'); setCurrentTab(''); }}>Реєстрація</button>
+                            <button className="login-btn" onClick={() => { navigate('/login'); if(setCurrentTab) setCurrentTab(''); }}>Увійти</button>
+                            <button className="register-btn" onClick={() => { navigate('/register'); if(setCurrentTab) setCurrentTab(''); }}>Реєстрація</button>
                         </div>
                     )}
                 </div>

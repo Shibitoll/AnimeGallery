@@ -32,16 +32,25 @@ const Profile = ({
     ? (ratedAnime.reduce((sum, a) => sum + parseFloat(a.user_rating), 0) / ratedAnime.length).toFixed(1)
     : '0.0';
 
-  const episodesWatched = watchedItems.reduce((sum, a) => sum + (parseInt(a.episodes) || 0), 0) + 
-                          watchingItems.reduce((sum, a) => sum + (parseInt(a.episodes) / 2 || 0), 0);
+  // ВИПРАВЛЕНО: використовуємо episodesCount замість episodes
+  const episodesWatched = watchedItems.reduce((sum, a) => sum + (parseInt(a.episodesCount || a.episodes) || 0), 0) + 
+                          watchingItems.reduce((sum, a) => sum + (parseInt(a.episodesCount || a.episodes) / 2 || 0), 0);
 
-  // Розрахунок жанрів
+  // ВИПРАВЛЕНО: безпечний розрахунок жанрів (працює і з масивами, і з рядками)
   const genreCounts = {};
   uniqueInteracted.forEach(anime => {
-    if (anime.genres && anime.genres !== 'Невідомо') {
-      const genres = anime.genres.split(',').map(g => g.trim());
-      genres.forEach(g => {
-        if (g) genreCounts[g] = (genreCounts[g] || 0) + 1;
+    if (anime.genres) {
+      let genresArray = [];
+      if (Array.isArray(anime.genres)) {
+        genresArray = anime.genres; // Якщо це вже масив
+      } else if (typeof anime.genres === 'string' && anime.genres !== 'Невідомо') {
+        genresArray = anime.genres.split(',').map(g => g.trim()); // Якщо це рядок
+      }
+      
+      genresArray.forEach(g => {
+        if (g && g !== 'Невідомо') {
+          genreCounts[g] = (genreCounts[g] || 0) + 1;
+        }
       });
     }
   });
@@ -177,7 +186,6 @@ const Profile = ({
         {/* 3. ПЕРСОНАЛЬНА БІБЛІОТЕКА (Вкладки та Сітка) */}
         <div>
           <div className="profile-tabs">
-            {/* ОНОВЛЕНО ПОРЯДОК: favorite -> watched -> watching -> planned */}
             {['favorite', 'watched', 'watching', 'planned'].map(tab => (
               <button 
                 key={tab}

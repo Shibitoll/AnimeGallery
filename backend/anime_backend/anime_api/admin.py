@@ -15,19 +15,33 @@ class AnimeAdmin(admin.ModelAdmin):
     Клас налаштування відображення моделі Anime в адмін-панелі.
     
     Забезпечує зручний інтерфейс для перегляду, фільтрації, пошуку та 
-    швидкого редагування записів каталогу аніме.
+    швидкого редагування записів каталогу аніме, адаптованого під AniHub API.
     """
-    list_display = ('title', 'rating', 'year', 'episodes', 'studio', 'is_favorite', 'in_watchlist')
-    """tuple: Поля, які виводяться у загальній таблиці списку аніме."""
-    list_filter = ('is_favorite', 'in_watchlist', 'year', 'studio')
-    """tuple: Поля, за якими формується бічна панель фільтрації."""
-    search_fields = ('title', 'description', 'genres')
-    """tuple: Поля, за якими працює рядок текстового пошуку."""
-    list_editable = ('is_favorite', 'in_watchlist')
-    """tuple: Поля, які дозволено змінювати прямо з таблиці (без переходу в картку)."""    
+    # Оновлено: виводимо українську назву, нове ID та нові типи
+    list_display = (
+        'title_ukrainian', 'anihub_id', 'rating', 'year', 
+        'episodes_count', 'type', 'has_ukrainian_dub', 
+        'is_favorite', 'is_watching', 'in_watchlist'
+    )
+    
+    # Оновлено: додано фільтр за наявністю дубляжу, типом та всіма статусами
+    list_filter = (
+        'is_favorite', 'is_watching', 'in_watchlist', 'planned', 
+        'has_ukrainian_dub', 'type', 'year'
+    )
+    
+    # Оновлено: пошук за українською назвою та AniHub ID
+    search_fields = ('title_ukrainian', 'anihub_id', 'slug', 'description')
+    
+    # Додано is_watching для швидкого редагування
+    list_editable = ('is_favorite', 'is_watching', 'in_watchlist')
 
 @admin.register(AnimeCache)
 class AnimeCacheAdmin(admin.ModelAdmin):
+    """
+    Якщо ти вирішиш повністю видалити кеш (оскільки фронтенд тепер робить 
+    запити до AniHub напряму), цей клас і саму модель можна буде стерти.
+    """
     list_display = ('anime_id', 'updated_at')
     search_fields = ('anime_id',)
     readonly_fields = ('updated_at',)
