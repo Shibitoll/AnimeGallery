@@ -1,51 +1,46 @@
 import numpy as np
 import pandas as pd
-from django.db.models import Avg, Count
+
+from .models import GlobalAnimeStats
 
 
-def get_bayesian_average_ranking(anime_queryset):
+def get_bayesian_average_ranking(limit=20):
     """
     Байєсівське середнє. Повертає список anihub_id.
+    Оскільки ми тепер рахуємо Байєса на рівні бази даних (GlobalAnimeStats)
+    при кожній зміні оцінки, нам достатньо просто дістати відсортований топ.
     """
     try:
-        global_stats = anime_queryset.aggregate(C=Avg('user_rating'))
-        C = float(global_stats['C'] or 0)
-
-        votes_counts = list(anime_queryset.values('anihub_id').annotate(v=Count('id')).values_list('v', flat=True))
-        m = float(np.quantile(votes_counts, 0.25)) if votes_counts else 0.0
-
-        unique_animes = anime_queryset.values('anihub_id').annotate(
-            v=Count('id'), 
-            R=Avg('user_rating')
-        )
-
-        ranked = []
-        for anime in unique_animes:
-            v = float(anime['v'])
-            R = float(anime['R'] or 0)
-            
-            wr = (v / (v + m)) * R + (m / (v + m)) * C if (v + m) > 0 else 0
-            ranked.append({'anihub_id': anime['anihub_id'], 'wr': wr})
-
-        ranked.sort(key=lambda x: x['wr'], reverse=True)
-        return [x['anihub_id'] for x in ranked[:20]]
+        # Беремо аніме, які мають хоча б 1 голос, сортуємо за зваженим рейтингом
+        stats = GlobalAnimeStats.objects.filter(votes_count__gt=0).order_by('-bayesian_rating')[:limit]
+        return [s.anime.anihub_id for s in stats]
     except Exception as e:
-        print(f"Помилка байєсівського середнього: {e}")
+        print(f"Помилка отримання зваженого рейтингу: {e}")
         return []
 
 def get_collaborative_recommendations(target_user_id, ratings_data):
     """
-    Колаборативна фільтрація. Повертає список anihub_id.
+    Колаборативна фільтрація (User-Based). 
+    Повертає список anihub_id.
+    
+    Алгоритм:
+    1. Знаходить користувачів, які ставили схожі оцінки тим самим аніме.
+    2. Вираховує їхню "вагу схожості".
+    3. Прогнозує, яку оцінку поставив би цільовий юзер тим аніме, які він ще не бачив,
+       але які високо оцінили його "сусіди" за смаками.
     """
     try:
         if not ratings_data:
             return []
 
         df = pd.DataFrame(ratings_data)
-        # Броньований захист від конфлікту типів (Decimal vs Float)
         df['rating'] = df['rating'].astype(float)
 
         R = df.pivot(index='user_id', columns='anihub_id', values='rating')
+        
+        if target_user_id not in R.index:
+            return []
+
         user_means = R.mean(axis=1)
         R_centered = R.sub(user_means, axis=0).fillna(0)
         
@@ -57,16 +52,15 @@ def get_collaborative_recommendations(target_user_id, ratings_data):
 
         sim_df = pd.DataFrame(sim_users, index=R.index, columns=R.index)
         
-        if target_user_id not in sim_df.index:
-            return []
-
         user_sims = sim_df.loc[target_user_id].drop(target_user_id)
         neighbors = user_sims[user_sims > 0]
         
         if neighbors.empty:
             return []
 
+        # Аніме, які наш користувач вже оцінив
         user_seen = R.loc[target_user_id].dropna().index
+        # Аніме, які він ще НЕ бачив (доступні для рекомендації)
         unseen = R.columns.difference(user_seen)
         
         preds = {}
@@ -84,6 +78,7 @@ def get_collaborative_recommendations(target_user_id, ratings_data):
             
         sorted_preds = sorted(preds.items(), key=lambda x: x[1], reverse=True)
         return [aid for aid, rating in sorted_preds][:20]
+        
     except Exception as e:
         print(f"Помилка колаборативної фільтрації: {e}")
         return []

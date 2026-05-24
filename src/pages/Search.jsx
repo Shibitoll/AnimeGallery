@@ -121,7 +121,7 @@ const Search = ({ data, onAddAnime, onToggleFavorite, onToggleWatching, onToggle
   };
 
   // 1. ЗАВАНТАЖЕННЯ ДАНИХ (АБСОЛЮТНО ЧИСТИЙ ЗАПИТ)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   useEffect(() => {
     const fetchSearchResults = async () => {
       try {

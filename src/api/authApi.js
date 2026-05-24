@@ -1,8 +1,7 @@
 // src/api/authApi.js
 
-const BASE_URL = 'http://localhost:8000/api/users'; // Переконайся, що цей шлях збігається з твоїм urls.py
+const BASE_URL = 'http://localhost:8000/api/users';
 
-// Утиліти для роботи з токенами
 export const setTokens = (access, refresh) => {
     localStorage.setItem('accessToken', access);
     localStorage.setItem('refreshToken', refresh);
@@ -16,7 +15,6 @@ export const clearTokens = () => {
     localStorage.removeItem('refreshToken');
 };
 
-// Реєстрація нового користувача
 export const registerUser = async (username, email, password) => {
     const response = await fetch(`${BASE_URL}/register/`, {
         method: 'POST',
@@ -28,13 +26,29 @@ export const registerUser = async (username, email, password) => {
 
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || errorData.username?.[0] || 'Помилка реєстрації');
+        
+        if (errorData.username) {
+            const msg = errorData.username[0];
+            if (msg.includes('already exists') || msg.includes('вже існує')) {
+                throw new Error('Користувач з таким нікнеймом вже існує.');
+            }
+            throw new Error(msg);
+        }
+        
+        if (errorData.email) {
+            const msg = errorData.email[0];
+            if (msg.includes('already exists') || msg.includes('вже існує')) {
+                throw new Error('Користувач з такою поштою вже існує.');
+            }
+            throw new Error(msg);
+        }
+
+        throw new Error(errorData.detail || 'Помилка під час реєстрації.');
     }
 
     return await response.json();
 };
 
-// Вхід користувача (Отримання токенів)
 export const loginUser = async (username, password) => {
     const response = await fetch(`${BASE_URL}/login/`, {
         method: 'POST',
@@ -49,6 +63,6 @@ export const loginUser = async (username, password) => {
     }
 
     const data = await response.json();
-    setTokens(data.access, data.refresh); // Зберігаємо JWT токени
+    setTokens(data.access, data.refresh);
     return data;
 };

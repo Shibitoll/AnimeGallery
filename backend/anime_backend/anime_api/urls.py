@@ -7,10 +7,9 @@ router = DefaultRouter()
 router.register(r'animes', views.AnimeViewSet, basename='anime')
 
 urlpatterns = [
-    # Кастомні ендпоінти СТАВИМО ВИЩЕ за router
     path('animes/recommended/', views.recommended_anime, name='recommended_anime'),
+    path('animes/user-comments-stats/', views.user_comment_stats, name='user_comment_stats'),
     path('proxy/', views.anihub_proxy, name='anihub_proxy'),
     
-    # Стандартний DRF router (включає /animes/ і /animes/<id>/)
     path('', include(router.urls)),
 ]

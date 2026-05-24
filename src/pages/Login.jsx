@@ -7,6 +7,8 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    const [showPassword, setShowPassword] = useState(false);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -18,8 +20,8 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
 
         try {
             await loginUser(formData.username, formData.password);
-            onLoginSuccess(); // Оновлюємо стан авторизації в App.jsx
-            onNavigate('home'); // Перенаправляємо на головну
+            onLoginSuccess();
+            onNavigate('home');
         } catch (err) {
             setError(err.message || 'Не вдалося увійти. Перевірте дані.');
         } finally {
@@ -47,16 +49,24 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
                         />
                     </div>
                     
-                    <div className="auth-field">
+                    <div className="auth-field" style={{ position: 'relative' }}>
                         <label>Пароль</label>
                         <input 
-                            type="password" 
+                            type={showPassword ? "text" : "password"} 
                             name="password" 
                             value={formData.password} 
                             onChange={handleChange} 
                             required 
                             placeholder="Ваш пароль"
+                            style={{ paddingRight: '40px' }}
                         />
+                        <span 
+                            onClick={() => setShowPassword(!showPassword)} 
+                            style={{ position: 'absolute', right: '12px', top: '38px', cursor: 'pointer', userSelect: 'none' }}
+                            title={showPassword ? "Приховати пароль" : "Показати пароль"}
+                        >
+                            {showPassword ? '🙈' : '👁️'}
+                        </span>
                     </div>
                     
                     <button type="submit" className="auth-submit-btn" disabled={isLoading}>

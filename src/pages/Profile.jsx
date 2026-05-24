@@ -6,18 +6,17 @@ import '../styles/Profile.css';
 
 const Profile = ({ 
   data, userInfo, onUpdateUser,
-  toggleFavorite, toggleWatching, toggleWatched, togglePlanned, onDeleteAnime, onUpdateRating 
+  toggleFavorite, toggleWatching, toggleWatched, togglePlanned, onDeleteAnime, onUpdateRating,
+  mostCommentedAnime = [] 
 }) => {
   const [activeTab, setActiveTab] = useState('favorite');
   
-  // Стан для режиму редагування
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: userInfo.name || "",
     email: userInfo.email || ""
   });
 
-  // Фільтруємо аніме для вкладок
   const favoriteItems = data.filter(a => a.is_favorite);
   const watchingItems = data.filter(a => a.is_watching);
   const watchedItems = data.filter(a => a.in_watchlist);
@@ -32,19 +31,17 @@ const Profile = ({
     ? (ratedAnime.reduce((sum, a) => sum + parseFloat(a.user_rating), 0) / ratedAnime.length).toFixed(1)
     : '0.0';
 
-  // ВИПРАВЛЕНО: використовуємо episodesCount замість episodes
   const episodesWatched = watchedItems.reduce((sum, a) => sum + (parseInt(a.episodesCount || a.episodes) || 0), 0) + 
                           watchingItems.reduce((sum, a) => sum + (parseInt(a.episodesCount || a.episodes) / 2 || 0), 0);
 
-  // ВИПРАВЛЕНО: безпечний розрахунок жанрів (працює і з масивами, і з рядками)
   const genreCounts = {};
   uniqueInteracted.forEach(anime => {
     if (anime.genres) {
       let genresArray = [];
       if (Array.isArray(anime.genres)) {
-        genresArray = anime.genres; // Якщо це вже масив
+        genresArray = anime.genres;
       } else if (typeof anime.genres === 'string' && anime.genres !== 'Невідомо') {
-        genresArray = anime.genres.split(',').map(g => g.trim()); // Якщо це рядок
+        genresArray = anime.genres.split(',').map(g => g.trim());
       }
       
       genresArray.forEach(g => {
@@ -59,7 +56,16 @@ const Profile = ({
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
-  // Обробник збереження профілю
+  // Допоміжна функція для правильного відмінювання слова "коментар"
+  const getCommentsString = (count) => {
+    const lastDigit = count % 10;
+    const lastTwoDigits = count % 100;
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return `${count} коментарів`;
+    if (lastDigit === 1) return `${count} коментар`;
+    if (lastDigit >= 2 && lastDigit <= 4) return `${count} коментарі`;
+    return `${count} коментарів`;
+  };
+
   const handleSaveProfile = () => {
     if (onUpdateUser) {
       onUpdateUser({
@@ -70,7 +76,6 @@ const Profile = ({
     setIsEditing(false);
   };
 
-  // Логіка рендеру карток (максимум 9 штук: 3 ряди по 3 картки)
   const renderActiveList = () => {
     let listToRender = [];
     if (activeTab === 'favorite') listToRender = favoriteItems;
@@ -82,7 +87,6 @@ const Profile = ({
       return <div className="empty-message" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Список порожній</div>;
     }
 
-    // Відрізаємо тільки перші 9
     const displayedItems = listToRender.slice(0, 9);
     const hasMore = listToRender.length > 9;
 
@@ -98,7 +102,6 @@ const Profile = ({
           onUpdateRating={onUpdateRating} 
         />
         
-        {/* Кнопка "Переглянути всі", якщо елементів більше 9 */}
         {hasMore && (
           <div className="view-more-wrapper">
             <Link to={`/${activeTab}`} className="view-more-link">
@@ -243,14 +246,43 @@ const Profile = ({
             )) : <p className="analytics-label">Недостатньо даних</p>}
           </div>
 
+          {/* ДИНАМІЧНИЙ БЛОК: НАЙБІЛЬШ КОМЕНТОВАНІ */}
           <div className="analytics-card">
             <h3><span>💬</span> Найбільш коментовані</h3>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <img src="https://placehold.co/40x60/3b82f6/white?text=SAO" alt="Anime" style={{ borderRadius: '6px', width: '45px', height: '65px', objectFit: 'cover' }} />
-              <div>
-                <strong style={{ fontSize: '14px' }}>Sword Art Online</strong>
-                <div style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '4px' }}>1 коментар</div>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              {mostCommentedAnime && mostCommentedAnime.length > 0 ? (
+                mostCommentedAnime.map((anime) => (
+                  <div key={anime.anihubId || anime.id} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <img 
+                      src={anime.poster || 'https://via.placeholder.com/45x65'} 
+                      alt={anime.titleUkrainian || anime.title} 
+                      style={{ borderRadius: '6px', width: '45px', height: '65px', objectFit: 'cover', background: '#222' }} 
+                    />
+                    <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                      <Link 
+                        to={`/anime/${anime.anihubId || anime.id}`} 
+                        style={{ 
+                          fontSize: '14px', 
+                          fontWeight: 'bold', 
+                          color: 'var(--text-primary)', 
+                          textDecoration: 'none',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                        className="commented-anime-link"
+                      >
+                        {anime.titleUkrainian || anime.title || 'Без назви'}
+                      </Link>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '4px' }}>
+                        {getCommentsString(anime.commentsCount || 0)}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="analytics-label" style={{ color: 'var(--text-muted)', margin: 0 }}>Ви ще не залишали коментарів</p>
+              )}
             </div>
           </div>
 

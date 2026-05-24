@@ -21,6 +21,9 @@ function App() {
   const [currentTab, setCurrentTab] = useState('home');
   const [loading, setLoading] = useState(true);
 
+  // Стан для секції "Найбільш коментовані" у профілі
+  const [mostCommentedAnime, setMostCommentedAnime] = useState([]);
+
   const [isAuthenticated, setIsAuthenticated] = useState(!!getAccessToken());
   const navigate = useNavigate();
 
@@ -66,6 +69,7 @@ function App() {
     setIsAuthenticated(false);
     setAnimeList([]);
     setRecommendedAnime([]);
+    setMostCommentedAnime([]);
     navigate('/login');
   };
 
@@ -94,6 +98,7 @@ function App() {
       if (!isAuthenticated) {
         setAnimeList([]);
         setRecommendedAnime([]);
+        setMostCommentedAnime([]);
         setCurrentUser({ name: "Гість", email: "", joinedDate: "", commentsCount: 0 }); 
         setLoading(false);
         return;
@@ -106,7 +111,7 @@ function App() {
           const userRes = await fetch('http://127.0.0.1:8000/api/users/me/', { headers: getAuthHeaders() });
           if (userRes.ok) {
             const userData = await userRes.json();
-            setCurrentUser({ name: userData.username, email: userData.email, joinedDate: userData.joinedDate, commentsCount: 0 });
+            setCurrentUser({ name: userData.username, email: userData.email, joinedDate: userData.joinedDate || "Невідомо", commentsCount: 0 });
           }
         } catch (err) { console.error(err); }
 
@@ -131,6 +136,17 @@ function App() {
           nextPageUrl = resJson.next || null;
         }
         setAnimeList(allAnime);
+
+        // 4. Завантажити статистику коментарів
+        try {
+          const statsData = await import('./api/streamingApi').then(m => m.streamingApi.getUserCommentsStats());
+          setMostCommentedAnime(statsData.most_commented || []);
+          setCurrentUser(prev => ({ 
+              ...prev, 
+              commentsCount: statsData.total_comments || 0 
+          }));
+        } catch (err) { console.error("Помилка коментарів:", err); }
+        
       } catch (error) {
         console.error("Завантаження перервано:", error);
       } finally {
@@ -277,7 +293,22 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/anime/:id" element={<AnimeDetails data={animeList} onAddAnime={(n) => updateAnimeStatus(n, {})} onToggleFavorite={toggleFavorite} onToggleWatching={toggleWatching} onToggleWatched={toggleWatched} onTogglePlanned={togglePlanned} onUpdateRating={updateRating} />} />
           <Route path="/search" element={<Search data={animeList} onAddAnime={(n) => updateAnimeStatus(n, {})} onToggleFavorite={toggleFavorite} onToggleWatching={toggleWatching} onToggleWatched={toggleWatched} onTogglePlanned={togglePlanned} onUpdateRating={updateRating} />} />
-          <Route path="/profile" element={<Profile data={animeList} userInfo={currentUser} onUpdateUser={handleUpdateUser} toggleFavorite={toggleFavorite} toggleWatching={toggleWatching} toggleWatched={toggleWatched} togglePlanned={togglePlanned} onDeleteAnime={deleteAnime} onUpdateRating={updateRating} />} />
+          
+          <Route path="/profile" element={
+            <Profile 
+                data={animeList} 
+                userInfo={currentUser} 
+                onUpdateUser={handleUpdateUser} 
+                toggleFavorite={toggleFavorite} 
+                toggleWatching={toggleWatching} 
+                toggleWatched={toggleWatched} 
+                togglePlanned={togglePlanned} 
+                onDeleteAnime={deleteAnime} 
+                onUpdateRating={updateRating}
+                mostCommentedAnime={mostCommentedAnime} 
+            />
+          } />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />

@@ -3,7 +3,6 @@ import { registerUser } from '../api/authApi';
 import '../styles/AuthForms.css';
 
 const Register = ({ onNavigate }) => {
-    // ДОДАНО confirmPassword в стан
     const [formData, setFormData] = useState({ 
         username: '', 
         email: '', 
@@ -13,6 +12,9 @@ const Register = ({ onNavigate }) => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -21,7 +23,6 @@ const Register = ({ onNavigate }) => {
         e.preventDefault();
         setError('');
 
-        // ПЕРЕВІРКА ПАРОЛІВ
         if (formData.password !== formData.confirmPassword) {
             setError('Паролі не співпадають!');
             return;
@@ -34,7 +35,7 @@ const Register = ({ onNavigate }) => {
             alert('Реєстрація успішна! Тепер ви можете увійти.');
             onNavigate('login');
         } catch (err) {
-            setError(err.message || 'Помилка під час реєстрації.');
+            setError(err.message);
         } finally {
             setIsLoading(false);
         }
@@ -72,31 +73,46 @@ const Register = ({ onNavigate }) => {
                         />
                     </div>
                     
-                    <div className="auth-field">
+                    <div className="auth-field" style={{ position: 'relative' }}>
                         <label>Пароль</label>
                         <input 
-                            type="password" 
+                            type={showPassword ? "text" : "password"} 
                             name="password" 
                             value={formData.password} 
                             onChange={handleChange} 
                             required 
                             placeholder="Мінімум 8 символів"
                             minLength="8"
+                            style={{ paddingRight: '40px' }}
                         />
+                        <span 
+                            onClick={() => setShowPassword(!showPassword)} 
+                            style={{ position: 'absolute', right: '12px', top: '38px', cursor: 'pointer', userSelect: 'none' }}
+                            title={showPassword ? "Приховати пароль" : "Показати пароль"}
+                        >
+                            {showPassword ? '🙈' : '👁️'}
+                        </span>
                     </div>
 
-                    {/* ДОДАНО ПОЛЕ ПІДТВЕРДЖЕННЯ ПАРОЛЯ */}
-                    <div className="auth-field">
+                    <div className="auth-field" style={{ position: 'relative' }}>
                         <label>Підтвердження пароля</label>
                         <input 
-                            type="password" 
+                            type={showConfirmPassword ? "text" : "password"} 
                             name="confirmPassword" 
                             value={formData.confirmPassword} 
                             onChange={handleChange} 
                             required 
                             placeholder="Повторіть пароль"
                             minLength="8"
+                            style={{ paddingRight: '40px' }}
                         />
+                        <span 
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)} 
+                            style={{ position: 'absolute', right: '12px', top: '38px', cursor: 'pointer', userSelect: 'none' }}
+                            title={showConfirmPassword ? "Приховати пароль" : "Показати пароль"}
+                        >
+                            {showConfirmPassword ? '🙈' : '👁️'}
+                        </span>
                     </div>
                     
                     <button type="submit" className="auth-submit-btn" disabled={isLoading}>
